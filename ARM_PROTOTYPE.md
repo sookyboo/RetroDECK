@@ -134,7 +134,8 @@ smoke-test-only workarounds.
   ES-DE's component resources into `/app/share/es-de`, as required by its
   `/app` install prefix.
 - Through ES-DE, Snes9x launches SNES games, and Genesis Plus GX launches Mega
-  Drive/Genesis, Master System, and Game Gear games.
+  Drive/Genesis, Master System, Game Gear, and Sega CD games. Sega CD required
+  BIOS files in RetroDECK's configured BIOS directory.
 - A Bluetooth Xbox controller works; pressing LS and RS together opens the
   RetroArch menu, including its save option. Game Boy game saves also work.
 - SRM and PortMaster are deferred to separate work. They are not bundled, and
