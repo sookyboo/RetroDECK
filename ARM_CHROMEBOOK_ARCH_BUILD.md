@@ -149,46 +149,36 @@ The RetroArch binary is at:
 build-arm64/files/retrodeck/components/retroarch/bin/retroarch
 ```
 
-Run the just-built appdir directly from the desktop session to test the
-integrated RetroDECK flow without exporting or installing it:
-
-```bash
-flatpak-builder --run --arch=aarch64 \
-  build-arm64 net.retrodeck.retrodeck.arm64.yml retrodeck
-```
-
-The build took several minutes. A successful build does not mean RetroDECK's
-launcher flow is ready: only the RetroArch component is currently provided for
-ARM.
+The build took several minutes. The integrated `flatpak-builder --run` path
+collides with the manifest's Discord `xdg-run/app` permission on this host.
+Use the local `arm-prototype` branch below to launch the built app.
 
 ## 8. Export and install without rebuilding
 
-The first Flatpak Builder command creates the finalized app directory, but
-does not install it. Export that existing directory to a local OSTree repo,
-make a bundle, and install the bundle:
+The first Flatpak Builder command creates the app directory, but does not
+install it. Export that existing directory to a local OSTree repo, then install
+its `arm-prototype` branch:
 
 ```bash
 cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
 
 flatpak build-export --arch=aarch64 \
-  .flatpak-builder/repo-arm64 build-arm64 stable
-
-flatpak build-bundle --arch=aarch64 \
-  --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
-  .flatpak-builder/repo-arm64 /tmp/retrodeck-arm64.flatpak \
-  net.retrodeck.retrodeck stable
-
-flatpak install --user /tmp/retrodeck-arm64.flatpak
+  .flatpak-builder/repo-arm64 build-arm64 arm-prototype
+flatpak remote-add --user --no-gpg-verify --if-not-exists \
+  retrodeck-arm-prototype .flatpak-builder/repo-arm64
+flatpak install --user retrodeck-arm-prototype \
+  net.retrodeck.retrodeck//arm-prototype
+flatpak run --user net.retrodeck.retrodeck//arm-prototype
 ```
 
-If Flatpak asks to add the Flathub remote recorded in the bundle, accept the
-prompt; then confirm installation. Exporting the already-finalized app with
-`flatpak-builder --finish-only` is not appropriate; it fails with “already
-finalized.” Use `flatpak build-export` as above. On the current build host,
-export fails during SVG icon validation because the host-side GdkPixbuf SVG
-loader is unavailable in the tool sandbox. Use the `--run` command in section
-7 to test the appdir while resolving that export issue. Export and bundle do
-not rebuild the app.
+If `flatpak build-export` reports that the app directory is not finalized, run
+`flatpak build-finish --no-exports build-arm64` and retry the export. If it
+reports that the directory is already finalized, skip `build-finish`.
+
+For later rebuilds, rerun the build command in section 7, export to the same
+branch, then update it with
+`flatpak update --user net.retrodeck.retrodeck//arm-prototype`. Exporting and
+installing the branch do not rebuild the app.
 
 ## 9. Run RetroArch and test a Game Boy Color ROM
 
@@ -231,9 +221,13 @@ Bundled cores and supported systems in this prototype:
 ## 10. Known limitations and next work
 
 - Framework and ES-DE component archives were built, and the full ARM manifest
-  completed with all three components staged. The integrated appdir has not
-  yet been launched. The separate ES-DE smoke-test app has rendered through
-  Panfrost and launched a GBC game using bundled ARM RetroArch and Gambatte.
+  completed with all three components staged. The integrated `arm-prototype`
+  branch has launched successfully: the first-run Zenity wizard completed,
+  ES-DE's scraper ran, and a Game Boy game launched. The separate ES-DE
+  smoke-test app also rendered through Panfrost and launched a GBC game using
+  bundled ARM RetroArch and Gambatte.
+- The ARM manifest exposes ES-DE component data at `/app/share/es-de`, the
+  path expected by the binary built with `/app` as its install prefix.
 - ES-DE 3.5.0 has now compiled for AArch64 with its GLES renderer enabled in
   the KDE 6.11 SDK. Its help and version commands run in the Flatpak build
   sandbox. Visible rendering has been confirmed on the Chromebook's Panfrost

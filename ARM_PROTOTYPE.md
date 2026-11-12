@@ -129,32 +129,32 @@ smoke-test-only workarounds.
 - The framework and ES-DE component builders have produced local archives; the
   full ARM manifest built successfully and its installer staged ES-DE,
   framework, and RetroArch together in the appdir.
+- The installed integrated prototype completed the Zenity first-run wizard,
+  ran the ES-DE scraper, and launched a Game Boy game. The ARM manifest links
+  ES-DE's component resources into `/app/share/es-de`, as required by its
+  `/app` install prefix.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 
 ### Still outstanding
 
-1. Launch the built appdir with the command in the Chromebook guide. The
-   integrated RetroDECK → ES-DE → RetroArch flow has not yet been run.
-2. Verify first-run initialization, theme/config loading, ROM discovery,
-   RetroArch core launch, audio/video, controller input, save/config writes,
-   and restart behavior in the integrated app.
-3. Check the x86_64 build remains unchanged and choose a maintainable
+1. Verify theme/config loading, ROM discovery, RetroArch core launch,
+   audio/video, controller input, save/config writes, and restart behavior.
+   Startup logs missing Steam ROM Manager helper functions because that
+   component is not bundled in this prototype.
+2. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern for component recipes before broadening the
    ARM core/emulator list.
 
 ## Recommended continuation sequence
 
-1. Run `flatpak-builder --run` against the existing `build-arm64` appdir to
-   test first-run and the integrated game-launch path without exporting it.
-2. Fix runtime/permission issues, then decide how to export/install the
-   finalized appdir on this host. A local `flatpak build-export` attempt failed
-   during SVG icon validation in the current tool sandbox; that did not affect
-   the successful Flatpak Builder build.
-3. Check the x86_64 build remains unchanged and choose a maintainable
+1. Finish verifying integrated input, saves, and restart behavior; triage the
+   missing Steam ROM Manager helper messages.
+2. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern before broadening the ARM core/emulator list.
-4. Record successful commands/results here and in the Chromebook build guide;
-   commit on both `arm-prototype` branches and push to the matching `origin`.
+3. Record successful commands/results here and in the Chromebook build guide;
+   commit the verified changes on the `arm-prototype` branches. Do not push
+   until the user has verified the build works.
 
 ## Build constraints and references
 
