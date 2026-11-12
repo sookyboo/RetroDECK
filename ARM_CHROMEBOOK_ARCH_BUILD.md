@@ -144,6 +144,8 @@ connection.
 The archive is written to
 `linux-arm64/ppsspp/artifacts/ppsspp.tar.gz`; the Alchemist library collector
 uses Flatpak's native architecture when collecting runtime libraries.
+The ES-DE ARM system definition defaults PSP launches to this standalone
+component and keeps the PPSSPP RetroArch core as an alternate emulator.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
@@ -265,9 +267,11 @@ every core runs well on this device.
 
 ## 10. Known limitations and next work
 
-- Framework, ES-DE, PICO-8, and RetroArch component archives were built, and the
-  full ARM manifest completed with those four components staged. PPSSPP is now
-  wired into the manifest; its archive and integrated launch still need testing.
+- Framework, ES-DE, PICO-8, PPSSPP, and RetroArch component archives were built,
+  and the full ARM manifest completed with all five components staged. The first
+  PSP launch still selected the RetroArch
+  core and failed GLEW initialization; rebuild ES-DE with the standalone PSP
+  default and verify a game launches through the PPSSPP component.
   The integrated `arm-prototype`
   branch has launched successfully: the first-run Zenity wizard completed,
   ES-DE's scraper ran, and a Game Boy game launched. The separate ES-DE
