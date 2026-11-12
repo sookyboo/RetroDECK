@@ -90,6 +90,7 @@ modules:
         commands:
           - python3 -c 'from pathlib import Path; p=Path("resources/systems/linuxarm/es_find_rules.xml"); s=p.read_text(); s=s.replace("        <rule type=\"staticpath\">", "        <rule type=\"staticpath\">\n            <entry>/app/retrodeck/components/retroarch/bin/retroarch</entry>", 1); p.write_text(s)'
           - python3 -c 'from pathlib import Path; p=Path("resources/systems/linuxarm/es_find_rules.xml"); s=p.read_text(); s=s.replace("        <rule type=\"corepath\">", "        <rule type=\"corepath\">\n            <entry>/app/retrodeck/components/retroarch/rd_extras/cores</entry>", 1); p.write_text(s)'
+          - python3 -c 'from pathlib import Path; p=Path("resources/systems/linuxarm/es_find_rules.xml"); s=p.read_text(); old="""    <emulator name=\"PICO-8\">\n        <!-- PICO-8 Fantasy Console (game engine) -->\n        <rule type=\"systempath\">\n            <entry>pico8</entry>\n        </rule>\n        <rule type=\"staticpath\">"""; new=old+"\n            <entry>/app/retrodeck/components/pico-8/component_launcher.sh</entry>"; assert old in s, "PICO-8 emulator block not found"; p.write_text(s.replace(old,new,1))'
           - sed -i '\|#include <SDL2/SDL_opengles.h>|d' es-core/src/renderers/ShaderOpenGL.h es-core/src/renderers/RendererOpenGL.h
           - "sed -i '/GLES3.*gl3.h/a #include <GLES2/gl2ext.h>' es-core/src/renderers/ShaderOpenGL.h"
           - sed -i '/^add_subdirectory(es-pdf-converter)$/d' CMakeLists.txt

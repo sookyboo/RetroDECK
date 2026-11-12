@@ -106,13 +106,15 @@ directory is Git-ignored.
 
 ## 6. Build the ARM component archives
 
-The ARM Flatpak manifest expects RetroArch, framework, and ES-DE archives in
-the sibling components worktree. Generate them before building the full app:
+The ARM Flatpak manifest expects RetroArch, framework, ES-DE, and PICO-8
+component archives in the sibling components worktree. Generate them before
+building the full app:
 
 ```bash
 cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/framework/build-component.sh
 ./linux-arm64/retroarch/build-component.sh
+./linux-arm64/pico-8/build-component.sh
 ./linux-arm64/es-de/build-component.sh
 ```
 
@@ -123,6 +125,9 @@ the RetroDECK theme and component config, and creates
 test app. The framework and ES-DE archive outputs, like the RetroArch archive,
 are Git-ignored. The ES-DE builder uses a disk-backed appdir at
 `RetroDECK-arm-prototype/.build-esde-arm64-component`.
+The PICO-8 archive contains only its component scripts and configuration; it
+does not contain proprietary PICO-8 files. The ES-DE package adds a static
+lookup path for the PICO-8 component launcher.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
@@ -327,3 +332,34 @@ Troubleshooting notes:
 - The `Tried to write to log file before it was open` messages were emitted in
   the successful launch as well; they were not the cause of the earlier
   emulator launch failures.
+
+### PICO-8 user-owned ARM64 copy
+
+PICO-8 is proprietary, so the ARM component packages only RetroDECK's launcher,
+configuration template, and component scripts. It does not package PICO-8's
+executable or data files. Place the user's licensed Linux copy in
+`$bios_path/pico-8` (on this Chromebook, `/home/duet/retrodeck/bios/pico-8`).
+The ARM64 distribution includes `pico8_64`; its bundled `pico8` is a 32-bit
+ARM executable and is not selected on AArch64.
+
+The PICO-8 component setup links its carts directory to
+`$roms_path/pico8` and its `cdata` save directory to `$saves_path/pico-8`.
+It keeps PICO-8's config under RetroDECK's XDG config directory and sets those
+paths there. The launcher passes that config home and selects `pico8_64` on
+AArch64. ES-DE's PICO-8 static-path rule resolves the component launcher, and
+ES-DE continues to pass each cartridge path to PICO-8.
+
+Build the component archive before building the full Flatpak:
+
+```bash
+cd /home/duet/dev/retrodeck/components-arm-prototype
+./linux-arm64/pico-8/build-component.sh
+```
+
+The ES-DE component packaging script also adds the PICO-8 launcher to the
+Linux ARM emulator discovery rules. Rebuild that archive when rebuilding
+ES-DE. Then build and install RetroDECK with the clean-build command in
+section 7, export it as in section 8, and run the `arm-prototype` branch.
+The PICO-8 launch still needs an on-device verification with a cartridge from
+`$roms_path/pico8`; verify the game starts and that cartridge-created saves
+appear under `$saves_path/pico-8`.

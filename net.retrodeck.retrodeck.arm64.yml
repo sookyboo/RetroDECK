@@ -318,6 +318,11 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/es-de/artifacts
         dest: components
+      # The PICO-8 component contains only scripts/config; the user supplies
+      # their licensed binary/data files under RetroDECK's BIOS directory.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/pico-8/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop
