@@ -229,6 +229,8 @@ Bundled cores and supported systems in this prototype:
 - A Bluetooth Xbox controller works in the integrated app. Pressing LS and RS
   together opens the RetroArch menu, where the save option is accessible.
 - Game Boy game saves were confirmed working.
+- The integrated ES-DE launch path also works with Snes9x for SNES games and
+  Genesis Plus GX for Mega Drive/Genesis, Master System, and Game Gear games.
 - The ARM manifest exposes ES-DE component data at `/app/share/es-de`, the
   path expected by the binary built with `/app` as its install prefix.
 - ES-DE 3.5.0 has now compiled for AArch64 with its GLES renderer enabled in
@@ -251,7 +253,8 @@ Bundled cores and supported systems in this prototype:
 
 The ARM prototype does not currently bundle Steam ROM Manager (SRM) or
 PortMaster. Their absent shell helpers cause startup messages, but neither
-integration blocked the verified setup, scraping, or Game Boy launch.
+integration blocked the verified setup, scraping, or game launches. These
+integrations are deferred to separate work.
 
 - **SRM:** RetroDECK uses SRM to add RetroDECK and ES-DE favorites to Steam,
   including artwork and shortcut management. The current Flatpak recipe

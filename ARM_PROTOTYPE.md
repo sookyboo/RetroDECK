@@ -133,34 +133,28 @@ smoke-test-only workarounds.
   ran the ES-DE scraper, and launched a Game Boy game. The ARM manifest links
   ES-DE's component resources into `/app/share/es-de`, as required by its
   `/app` install prefix.
+- Through ES-DE, Snes9x launches SNES games, and Genesis Plus GX launches Mega
+  Drive/Genesis, Master System, and Game Gear games.
 - A Bluetooth Xbox controller works; pressing LS and RS together opens the
   RetroArch menu, including its save option. Game Boy game saves also work.
-- SRM and PortMaster are not bundled, so their shell helpers are missing at
-  startup. The resulting messages did not block the verified use cases.
+- SRM and PortMaster are deferred to separate work. They are not bundled, and
+  their missing shell helpers produce startup messages without blocking the
+  verified use cases.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 
 ### Still outstanding
 
-1. Decide how to handle optional SRM and PortMaster helpers. SRM's current
-   Flathub app is x86_64-only, although upstream publishes an ARM64 AppImage;
-   see the investigation and source links in the Chromebook guide. PortMaster
-   has AArch64 runtimes, but this Chromebook is not listed as a supported
-   device. Its RetroDECK component also prepares under `$XDG_DATA_HOME` while
-   the launcher expects `/var/data/PortMaster`.
-2. Verify theme/config loading. Restart persistence has been verified.
-3. Check the x86_64 build remains unchanged and choose a maintainable
+1. Verify theme/config loading. Restart persistence has been verified.
+2. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern for component recipes before broadening the
-   ARM core/emulator list.
+   ARM core/emulator list. Choose the next systems based on user priorities.
 
 ## Recommended continuation sequence
 
-1. Decide whether the Chromebook prototype should disable these optional
-   integrations cleanly or pursue dedicated ARM packages and compatibility
-   work.
-2. Check the x86_64 build remains unchanged and choose a maintainable
+1. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern before broadening the ARM core/emulator list.
-3. Record successful commands/results here and in the Chromebook build guide;
+2. Record successful commands/results here and in the Chromebook build guide;
    commit the verified changes on the `arm-prototype` branches. Do not push
    until the user has verified the build works.
 
