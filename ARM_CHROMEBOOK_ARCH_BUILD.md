@@ -136,16 +136,26 @@ The PICO-8 archive contains only its component scripts and configuration; it
 does not contain proprietary PICO-8 files. The ES-DE package adds a static
 lookup path for the PICO-8 component launcher.
 
-The PPSSPP builder resolves the current stable Flathub commit on the host and
-extracts its files into a component archive. Flatpak commit IDs differ by
-architecture, so the ARM builder overrides the shared x86 commit pin with this
-host's AArch64 commit. Run it on the Chromebook; it requires a working Flathub
-connection.
+The PPSSPP builder extracts the AArch64 Flathub app into a component archive.
+Flatpak commit IDs differ by architecture, so the ARM builder pins the
+AArch64-specific commit `678bf845ac9679ddf5d2be24ed39bc21b269a573b7ba07a1795175aaf4a57040`.
+The newer stable commit uses Freedesktop 26.08 and requires GLIBC 2.43/2.44,
+which is too new for RetroDECK's KDE 6.11 runtime (GLIBC 2.42). The pinned
+commit uses Freedesktop 25.08 and its PPSSPP executable requires GLIBC up to
+2.38, so it launches in the KDE 6.11 runtime. Recheck this pin when updating
+PPSSPP or RetroDECK's runtime.
 The archive is written to
 `linux-arm64/ppsspp/artifacts/ppsspp.tar.gz`; the Alchemist library collector
 uses Flatpak's native architecture when collecting runtime libraries.
 The ES-DE ARM system definition defaults PSP launches to this standalone
 component and keeps the PPSSPP RetroArch core as an alternate emulator.
+
+Fresh RetroDECK setup calls `prepare_component "reset" "all"`, which copies
+the bundled PPSSPP defaults into the user's config directory. If PPSSPP is
+added to an already initialized profile, that initial reset has already passed;
+reset PPSSPP once in the Configurator to apply its defaults. This replaces its
+current `ppsspp.ini` and `controls.ini`, so back them up first if they contain
+settings to keep.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
@@ -268,10 +278,9 @@ every core runs well on this device.
 ## 10. Known limitations and next work
 
 - Framework, ES-DE, PICO-8, PPSSPP, and RetroArch component archives were built,
-  and the full ARM manifest completed with all five components staged. The first
-  PSP launch still selected the RetroArch
-  core and failed GLEW initialization; rebuild ES-DE with the standalone PSP
-  default and verify a game launches through the PPSSPP component.
+  and the full ARM manifest completed with all five components staged. A PSP
+  game launched successfully through standalone PPSSPP after pinning the
+  compatible AArch64 Flathub commit and rebuilding the component archive.
   The integrated `arm-prototype`
   branch has launched successfully: the first-run Zenity wizard completed,
   ES-DE's scraper ran, and a Game Boy game launched. The separate ES-DE
