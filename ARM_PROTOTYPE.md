@@ -34,9 +34,9 @@ The current functional prototype includes these implementation commits:
 - RetroDECK: `310f4e4d` — `Add ARM ES-DE GLES launch smoke test`
 - components: `395f538a` — `Use ARM ES-DE system definitions`
 
-The generated RetroArch archive is intentionally ignored by Git, so a new
-builder must create it locally using section 5 in the Chromebook guide before
-building the ARM Flatpak or ES-DE test app. Both branches track
+The generated component archives are intentionally ignored by Git, so a new
+builder must create them locally using section 6 in the Chromebook guide
+before building the ARM Flatpak. Both branches track
 `origin/arm-prototype`; do not push ARM changes to `upstream`.
 
 ## How the packaging is intended to work
@@ -54,6 +54,20 @@ libretro cores. Its output is:
 ```text
 components-arm-prototype/linux-arm64/retroarch/artifacts/retroarch.tar.gz
 ```
+
+Two additional component builders are now present:
+
+- `linux-arm64/framework/build-component.sh` packages the architecture-neutral
+  framework scripts and metadata.
+- `linux-arm64/es-de/build-component.sh` builds the ES-DE GLES smoke-test app
+  and assembles an ES-DE component archive containing the executable, required
+  private libraries, Linux ARM resources, RetroDECK theme/config, and component
+  scripts.
+
+Their expected archives are
+`linux-arm64/framework/artifacts/framework.tar.gz` and
+`linux-arm64/es-de/artifacts/es-de.tar.gz`. The main ARM manifest stages all
+three component artifact directories for `install_components.sh`.
 
 The main ARM manifest is `net.retrodeck.retrodeck.arm64.yml`. It selects the
 AArch64 rclone release, omits unused yq, and removes x86/i386 codec and
@@ -112,51 +126,34 @@ smoke-test-only workarounds.
 - ES-DE 3.5.0 builds with GLES enabled and visibly renders on Panfrost.
 - ES-DE can launch the bundled RetroArch and Gambatte and play the same GBC
   game when built with `FLATPAK_BUILD=off`.
+- The framework and ES-DE component builders have produced local archives; the
+  full ARM manifest built successfully and its installer staged ES-DE,
+  framework, and RetroArch together in the appdir.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 
 ### Still outstanding
 
-1. Build/package an ARM ES-DE component that retains the RetroDECK config,
-   theme, resources, and `linuxarm` definitions. The existing component recipe
-   downloads the x86_64 AppImage. The ES-DE fork has
-   `tools/create_AppImage_AArch64.sh`, but that script is desktop-GL oriented;
-   the Chromebook smoke test instead uses an in-runtime GLES build. Decide
-   whether to produce a GLES AppImage/component or build/install ES-DE directly
-   into the component layout. Keep the artifact layout compatible with
-   `/app/retrodeck/components/es-de/` and the RetroDECK launcher.
-2. Integrate `framework` and its startup/configuration flow into the ARM
-   manifest. The framework component recipe is local shell/config assets, but
-   audit scripts and dependencies for x86-only executables or paths.
-3. Make the integrated ARM ES-DE component use
-   `resources/systems/linuxarm/es_systems.xml` and `es_find_rules.xml`. The
-   components branch already changes `es-de/component_functions.sh` to point
-   at `linuxarm`; make sure these files are actually staged in the component
-   artifact and that ES-DE itself is compiled with `FLATPAK_BUILD=off` for
-   bundled-emulator launches.
-4. Put ARM RetroArch, ES-DE, and framework artifacts into the exact component
-   input paths consumed by `install_components.sh`; build the complete
-   `net.retrodeck.retrodeck.arm64.yml` Flatpak.
-5. Verify first-run initialization, theme/config loading, ROM discovery,
+1. Launch the built appdir with the command in the Chromebook guide. The
+   integrated RetroDECK → ES-DE → RetroArch flow has not yet been run.
+2. Verify first-run initialization, theme/config loading, ROM discovery,
    RetroArch core launch, audio/video, controller input, save/config writes,
    and restart behavior in the integrated app.
-6. Check the x86_64 build remains unchanged and choose a maintainable
+3. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern for component recipes before broadening the
    ARM core/emulator list.
 
 ## Recommended continuation sequence
 
-1. Recreate the ARM RetroArch archive using the commands and disk-space notes
-   in the Chromebook guide.
-2. Turn the successful ES-DE smoke manifest recipe into an ARM ES-DE component
-   build/install step. Retain the GLES and `FLATPAK_BUILD=off` decisions, add
-   the RetroDECK theme/config, and handle Poppler intentionally.
-3. Build the framework component archive and audit its runtime assumptions.
-4. Update the ARM Flatpak manifest/component staging so all three components
-   are installed at their expected `/app/retrodeck/components/<name>` paths.
-5. Build, install, and run the integrated app. Fix packaging/runtime issues
-   before expanding supported systems or adding more cores.
-6. Record successful commands/results here and in the Chromebook build guide;
+1. Run `flatpak-builder --run` against the existing `build-arm64` appdir to
+   test first-run and the integrated game-launch path without exporting it.
+2. Fix runtime/permission issues, then decide how to export/install the
+   finalized appdir on this host. A local `flatpak build-export` attempt failed
+   during SVG icon validation in the current tool sandbox; that did not affect
+   the successful Flatpak Builder build.
+3. Check the x86_64 build remains unchanged and choose a maintainable
+   architecture-selection pattern before broadening the ARM core/emulator list.
+4. Record successful commands/results here and in the Chromebook build guide;
    commit on both `arm-prototype` branches and push to the matching `origin`.
 
 ## Build constraints and references
@@ -168,6 +165,12 @@ smoke-test-only workarounds.
   memory pressure.
 - The smoke-test app is `net.retrodeck.esde.gles.test`; its build/run commands
   and host package prerequisites are in `ARM_CHROMEBOOK_ARCH_BUILD.md`.
+- The ES-DE component builder depends on the RetroArch archive and sibling
+  `RetroDECK-arm-prototype` worktree; it rebuilds the smoke-test appdir in
+  `.build-esde-arm64-component` and does not install that test app.
+- The RetroDECK theme source is currently fetched from the theme repository's
+  `main` branch, following the existing upstream recipe. Pin it for a
+  reproducible release build.
 - ES-DE's checked-out ARM developer notes are in
   `LINUX-AARCH64-DEV.md`; inspect the pinned source in Flatpak Builder's build
   cache or fetch the same commit when resuming.

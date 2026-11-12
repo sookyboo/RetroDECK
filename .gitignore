@@ -11,6 +11,9 @@ Thumbs.db
 # RetroDECK specific files #
 ############################
 .flatpak-builder/
+.build-esde-arm64-component/
+.tmp-arm-esde-component.*/
+.tmp-arm-framework-build/
 retrodeck-flatpak-cooker/
 retrodeck-flatpak/
 backup

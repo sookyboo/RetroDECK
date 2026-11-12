@@ -104,7 +104,31 @@ The generated archive is about 424 MiB and contains RetroArch, assets, database
 data, and the Gambatte, Snes9x, and Genesis Plus GX cores. The artifacts
 directory is Git-ignored.
 
-## 6. Build the AArch64 Flatpak
+## 6. Build the ARM component archives
+
+The ARM Flatpak manifest expects RetroArch, framework, and ES-DE archives in
+the sibling components worktree. Generate them before building the full app:
+
+```bash
+cd /home/duet/dev/retrodeck/components-arm-prototype
+./linux-arm64/framework/build-component.sh
+./linux-arm64/retroarch/build-component.sh
+./linux-arm64/es-de/build-component.sh
+```
+
+The ES-DE builder uses the successful GLES smoke-test manifest and requires
+the RetroArch archive first. It builds ES-DE with `FLATPAK_BUILD=off`, stages
+the RetroDECK theme and component config, and creates
+`linux-arm64/es-de/artifacts/es-de.tar.gz`. It does not install the standalone
+test app. The framework and ES-DE archive outputs, like the RetroArch archive,
+are Git-ignored. The ES-DE builder uses a disk-backed appdir at
+`RetroDECK-arm-prototype/.build-esde-arm64-component`.
+
+The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
+the existing component recipe. Pin the theme revision for a reproducible
+release build.
+
+## 7. Build the AArch64 Flatpak
 
 The ARM manifest derives its version from the metainfo file because the normal
 `retrodeck_builder.sh` step that creates the Git-ignored `version` file is not
@@ -116,18 +140,28 @@ flatpak-builder --force-clean --arch=aarch64 --install-deps-from=flathub \
   build-arm64 net.retrodeck.retrodeck.arm64.yml
 ```
 
-The build completed successfully on the Chromebook. Its output directory is
-`build-arm64/`; the installed RetroArch binary is at:
+The full manifest has now built successfully with the RetroArch, framework,
+and ES-DE archives generated in section 6. Its output directory is
+`build-arm64/`; the components are under `build-arm64/files/retrodeck/components/`.
+The RetroArch binary is at:
 
 ```text
 build-arm64/files/retrodeck/components/retroarch/bin/retroarch
+```
+
+Run the just-built appdir directly from the desktop session to test the
+integrated RetroDECK flow without exporting or installing it:
+
+```bash
+flatpak-builder --run --arch=aarch64 \
+  build-arm64 net.retrodeck.retrodeck.arm64.yml retrodeck
 ```
 
 The build took several minutes. A successful build does not mean RetroDECK's
 launcher flow is ready: only the RetroArch component is currently provided for
 ARM.
 
-## 7. Export and install without rebuilding
+## 8. Export and install without rebuilding
 
 The first Flatpak Builder command creates the finalized app directory, but
 does not install it. Export that existing directory to a local OSTree repo,
@@ -149,11 +183,14 @@ flatpak install --user /tmp/retrodeck-arm64.flatpak
 
 If Flatpak asks to add the Flathub remote recorded in the bundle, accept the
 prompt; then confirm installation. Exporting the already-finalized app with
-`flatpak-builder --finish-only` is not the right step and failed with “already
-finalized.” Use `flatpak build-export` as above. The export and bundle steps do
+`flatpak-builder --finish-only` is not appropriate; it fails with “already
+finalized.” Use `flatpak build-export` as above. On the current build host,
+export fails during SVG icon validation because the host-side GdkPixbuf SVG
+loader is unavailable in the tool sandbox. Use the `--run` command in section
+7 to test the appdir while resolving that export issue. Export and bundle do
 not rebuild the app.
 
-## 8. Run RetroArch and test a Game Boy Color ROM
+## 9. Run RetroArch and test a Game Boy Color ROM
 
 Check that the installed RetroArch binary starts in the Flatpak runtime:
 
@@ -191,12 +228,12 @@ Bundled cores and supported systems in this prototype:
 - Snes9x: Super Nintendo / Super Famicom.
 - Genesis Plus GX: Genesis / Mega Drive, Master System, Game Gear, and Sega CD.
 
-## 9. Known limitations and next work
+## 10. Known limitations and next work
 
-- The ARM framework and ES-DE component artifacts have not been integrated
-  into the full RetroDECK app. The separate ES-DE smoke-test app has rendered
-  through Panfrost and launched a GBC game using bundled ARM RetroArch and
-  Gambatte.
+- Framework and ES-DE component archives were built, and the full ARM manifest
+  completed with all three components staged. The integrated appdir has not
+  yet been launched. The separate ES-DE smoke-test app has rendered through
+  Panfrost and launched a GBC game using bundled ARM RetroArch and Gambatte.
 - ES-DE 3.5.0 has now compiled for AArch64 with its GLES renderer enabled in
   the KDE 6.11 SDK. Its help and version commands run in the Flatpak build
   sandbox. Visible rendering has been confirmed on the Chromebook's Panfrost
@@ -210,8 +247,8 @@ Bundled cores and supported systems in this prototype:
   updated deliberately for reproducible builds.
 - Do not place x86_64 component archives in the ARM manifest's `components/`
   input.
-- For a fresh clean build, use the command in section 6. For an already-built
-  finalized app directory, export it as in section 7 instead of rebuilding.
+- For a fresh clean build, use the command in section 7. For an already-built
+  finalized app directory, export it as in section 8 instead of rebuilding.
 
 ### ES-DE GLES smoke test
 

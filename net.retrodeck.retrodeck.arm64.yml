@@ -305,6 +305,14 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/retroarch/artifacts
         dest: components
+      # The framework component contains architecture-independent scripts.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/framework/artifacts
+        dest: components
+      # Stage the ARM ES-DE component archive at the installer input path.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/es-de/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop
