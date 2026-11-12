@@ -1,12 +1,15 @@
 # Building and testing the ARM RetroDECK prototype on Arch Linux ARM
 
 This guide records the working local workflow used on an AArch64 Chromebook
-running Arch Linux ARM. The prototype currently packages RetroArch and three
-ARM64 Libretro cores in a Flatpak based on KDE Platform 6.11.
+running Arch Linux ARM. The ARM RetroDECK prototype packages RetroArch and
+three ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
+builds the frontend with GLES and validates launching a bundled core.
 
-> **Scope:** RetroArch has been launched inside the Flatpak, Gambatte loaded a
-> Game Boy Color ROM, and both video and audio worked. This is not yet a full
-> RetroDECK launch: ARM `framework` and ES-DE components are still outstanding.
+> **Scope:** RetroArch and ES-DE have each been tested inside Flatpak apps, and
+> ES-DE successfully launched a Game Boy Color ROM through bundled RetroArch
+> and Gambatte. This does not yet validate the integrated RetroDECK framework,
+> first-run setup, theme, or configuration flow; ARM `framework` and integrated
+> ES-DE component artifacts remain outstanding.
 
 ## 1. Check the machine and GPU
 
@@ -218,6 +221,7 @@ parallel jobs to stay within the Chromebook's memory limit:
 ```bash
 cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
 flatpak-builder --force-clean --jobs=2 --arch=aarch64 \
+  --user --install \
   --install-deps-from=flathub \
   .build-esde-arm64-gles net.retrodeck.esde-gles-test.yml
 ```
@@ -230,6 +234,12 @@ flatpak-builder --run --arch=aarch64 \
   .build-esde-arm64-gles net.retrodeck.esde-gles-test.yml es-de
 ```
 
+To launch the installed test app and try the game from the ES-DE UI:
+
+```bash
+flatpak run --user net.retrodeck.esde.gles.test
+```
+
 The test manifest also bundles the ARM RetroArch component and selected cores,
 and adds their `/app/retrodeck/components/retroarch` paths to ES-DE's ARM find
 rules. ES-DE is compiled with `FLATPAK_BUILD=off` for this test: that upstream
@@ -238,3 +248,16 @@ emulators bundled inside this app's `/app` tree. The app itself remains a
 Flatpak; this setting makes ES-DE launch bundled emulators inside its sandbox.
 This separate test app validates the ES-DE-to-RetroArch launch path, not the
 full RetroDECK launcher, component preparation, theme, or configuration flow.
+
+Troubleshooting notes:
+
+- If ES-DE says the emulator or core is missing, check that the ARM RetroArch
+  artifact exists and that both find-rule paths above match the installed
+  app's `/app/retrodeck/components/retroarch/` layout.
+- If the log shows a launch through `flatpak-spawn --host` followed by
+  `No such file or directory` for an `/app/...` binary, check that the ES-DE
+  test was built with `-DFLATPAK_BUILD=off`; a clean rebuild is needed after
+  changing this CMake option.
+- The `Tried to write to log file before it was open` messages were emitted in
+  the successful launch as well; they were not the cause of the earlier
+  emulator launch failures.
