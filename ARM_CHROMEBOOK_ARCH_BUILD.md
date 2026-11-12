@@ -112,17 +112,19 @@ The omitted x86 core names are `ardens`, `boom3_xp`, `bsnes_hd_beta`,
 
 ## 6. Build the ARM component archives
 
-The ARM Flatpak manifest expects RetroArch, framework, ES-DE, PICO-8, and
-PPSSPP component archives in the sibling components worktree. Generate them
-before building the full app:
+The ARM Flatpak manifest expects RetroArch, framework, ES-DE, PICO-8, PPSSPP,
+Ruffle, and ScummVM component archives in the sibling components worktree.
+Generate them before building the full app:
 
 ```bash
 cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/framework/build-component.sh
 ./linux-arm64/retroarch/build-component.sh
 ./linux-arm64/pico-8/build-component.sh
-./linux-arm64/es-de/build-component.sh
 ./linux-arm64/ppsspp/build-component.sh
+./linux-arm64/ruffle/build-component.sh
+./linux-arm64/scummvm/build-component.sh
+./linux-arm64/es-de/build-component.sh
 ```
 
 The ES-DE builder uses the successful GLES smoke-test manifest and requires
@@ -156,6 +158,17 @@ added to an already initialized profile, that initial reset has already passed;
 reset PPSSPP once in the Configurator to apply its defaults. This replaces its
 current `ppsspp.ini` and `controls.ini`, so back them up first if they contain
 settings to keep.
+
+The ScummVM builder extracts the native AArch64 Flathub app, pinned at
+`f1fcccc1433fc8ea77d8adff40946d3083055d5eec5facb50a8f262d7a362dcc`.
+Flathub's manifest uses Freedesktop 25.08. The component keeps the upstream
+Linux ARM ScummVM system definition: RetroArch's ScummVM core remains the
+default, and standalone ScummVM is available as an alternate emulator. The
+ES-DE build adds the bundled launcher to the `SCUMMVM` static-path lookup. The
+archive is written to
+`linux-arm64/scummvm/artifacts/scummvm.tar.gz`. This integration still needs
+an on-device build and game launch check; the Chromebook currently cannot
+resolve Flathub from its build environment.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible

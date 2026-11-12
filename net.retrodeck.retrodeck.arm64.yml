@@ -331,6 +331,10 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/ruffle/artifacts
         dest: components
+      # ScummVM is extracted from its native AArch64 Flathub build.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/scummvm/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop
