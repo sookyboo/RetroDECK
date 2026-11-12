@@ -323,6 +323,10 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/pico-8/artifacts
         dest: components
+      # PPSSPP is pulled from Flathub on the native build architecture.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/ppsspp/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop

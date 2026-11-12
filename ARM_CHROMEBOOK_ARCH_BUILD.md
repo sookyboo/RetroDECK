@@ -112,9 +112,9 @@ The omitted x86 core names are `ardens`, `boom3_xp`, `bsnes_hd_beta`,
 
 ## 6. Build the ARM component archives
 
-The ARM Flatpak manifest expects RetroArch, framework, ES-DE, and PICO-8
-component archives in the sibling components worktree. Generate them before
-building the full app:
+The ARM Flatpak manifest expects RetroArch, framework, ES-DE, PICO-8, and
+PPSSPP component archives in the sibling components worktree. Generate them
+before building the full app:
 
 ```bash
 cd /home/duet/dev/retrodeck/components-arm-prototype
@@ -122,6 +122,7 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/retroarch/build-component.sh
 ./linux-arm64/pico-8/build-component.sh
 ./linux-arm64/es-de/build-component.sh
+./linux-arm64/ppsspp/build-component.sh
 ```
 
 The ES-DE builder uses the successful GLES smoke-test manifest and requires
@@ -134,6 +135,13 @@ are Git-ignored. The ES-DE builder uses a disk-backed appdir at
 The PICO-8 archive contains only its component scripts and configuration; it
 does not contain proprietary PICO-8 files. The ES-DE package adds a static
 lookup path for the PICO-8 component launcher.
+
+The PPSSPP builder installs the pinned Flathub app on the host and extracts its
+files into a component archive. Run it on the AArch64 Chromebook so Flatpak
+selects the AArch64 app and runtime. It requires a working Flathub connection.
+The archive is written to
+`linux-arm64/ppsspp/artifacts/ppsspp.tar.gz`; the Alchemist library collector
+uses Flatpak's native architecture when collecting runtime libraries.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
@@ -152,8 +160,9 @@ flatpak-builder --user --force-clean --arch=aarch64 --jobs=2 \
   build-arm64 net.retrodeck.retrodeck.arm64.yml
 ```
 
-The full manifest has now built successfully with the RetroArch, framework,
-and ES-DE archives generated in section 6. Its output directory is
+The full manifest has previously built successfully with the RetroArch,
+framework, and ES-DE archives generated in section 6. Rebuild the PPSSPP
+archive before building with the updated manifest. Its output directory is
 `build-arm64/`; the components are under `build-arm64/files/retrodeck/components/`.
 The RetroArch binary is at:
 
@@ -255,7 +264,9 @@ every core runs well on this device.
 ## 10. Known limitations and next work
 
 - Framework, ES-DE, PICO-8, and RetroArch component archives were built, and the
-  full ARM manifest completed with all four components staged. The integrated `arm-prototype`
+  full ARM manifest completed with those four components staged. PPSSPP is now
+  wired into the manifest; its archive and integrated launch still need testing.
+  The integrated `arm-prototype`
   branch has launched successfully: the first-run Zenity wizard completed,
   ES-DE's scraper ran, and a Game Boy game launched. The separate ES-DE
   smoke-test app also rendered through Panfrost and launched a GBC game using
