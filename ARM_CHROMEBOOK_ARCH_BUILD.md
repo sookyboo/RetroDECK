@@ -247,6 +247,33 @@ Bundled cores and supported systems in this prototype:
 - For a fresh clean build, use the command in section 7. For an already-built
   finalized app directory, export it as in section 8 instead of rebuilding.
 
+### SRM and PortMaster integration status
+
+The ARM prototype does not currently bundle Steam ROM Manager (SRM) or
+PortMaster. Their absent shell helpers cause startup messages, but neither
+integration blocked the verified setup, scraping, or Game Boy launch.
+
+- **SRM:** RetroDECK uses SRM to add RetroDECK and ES-DE favorites to Steam,
+  including artwork and shortcut management. The current Flatpak recipe
+  downloads an x86_64-only Flathub app whose manifest uses an AMD64 Debian
+  package. Upstream publishes an ARM64 AppImage, so a custom ARM component
+  appears possible. It is useful only where a compatible Steam installation
+  is accessible. See the [Flathub architecture listing](https://flathub.org/apps/details/com.steamgriddb.steam-rom-manager),
+  [Flathub manifest](https://raw.githubusercontent.com/flathub/com.steamgriddb.steam-rom-manager/master/com.steamgriddb.steam-rom-manager.json),
+  and [upstream releases](https://github.com/SteamGridDB/steam-rom-manager/releases).
+- **PortMaster:** PortMaster publishes AArch64 runtimes, but its supported
+  device list documents RetroDECK on Steam Deck and does not list this
+  Chromebook. The existing RetroDECK component prepares files under
+  `$XDG_DATA_HOME/PortMaster`, while its launcher executes
+  `/var/data/PortMaster/PortMaster.sh`; resolve this path difference before
+  packaging it. Test GUI/input/display compatibility and individual ARM ports
+  on Panfrost/KDE. See the [supported devices](https://portmaster.games/installation/supported-handhelds/)
+  and [runtime architectures](https://portmaster.games/installation/runtimes/).
+- For clean startup without pretending either full integration is available,
+  guard optional helper calls or package only the architecture-independent
+  helper scripts and keep unavailable UI actions disabled. Neither full SRM
+  nor full PortMaster support has been tested on the Chromebook.
+
 ### ES-DE GLES smoke test
 
 The test manifest is `net.retrodeck.esde-gles-test.yml`. Build it with two

@@ -135,22 +135,29 @@ smoke-test-only workarounds.
   `/app` install prefix.
 - A Bluetooth Xbox controller works; pressing LS and RS together opens the
   RetroArch menu, including its save option. Game Boy game saves also work.
+- SRM and PortMaster are not bundled, so their shell helpers are missing at
+  startup. The resulting messages did not block the verified use cases.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 
 ### Still outstanding
 
-1. Verify theme/config loading and restart behavior. Startup logs missing
-   Steam ROM Manager helper functions because that component is not bundled in
-   this prototype.
-2. Check the x86_64 build remains unchanged and choose a maintainable
+1. Decide how to handle optional SRM and PortMaster helpers. SRM's current
+   Flathub app is x86_64-only, although upstream publishes an ARM64 AppImage;
+   see the investigation and source links in the Chromebook guide. PortMaster
+   has AArch64 runtimes, but this Chromebook is not listed as a supported
+   device. Its RetroDECK component also prepares under `$XDG_DATA_HOME` while
+   the launcher expects `/var/data/PortMaster`.
+2. Verify theme/config loading. Restart persistence has been verified.
+3. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern for component recipes before broadening the
    ARM core/emulator list.
 
 ## Recommended continuation sequence
 
-1. Finish verifying restart behavior; triage the missing Steam ROM Manager
-   helper messages.
+1. Decide whether the Chromebook prototype should disable these optional
+   integrations cleanly or pursue dedicated ARM packages and compatibility
+   work.
 2. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern before broadening the ARM core/emulator list.
 3. Record successful commands/results here and in the Chromebook build guide;
