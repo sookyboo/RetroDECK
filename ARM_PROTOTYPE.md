@@ -1,5 +1,8 @@
 # ARM64 RetroDECK prototype
 
+For the tested Arch Linux ARM Chromebook setup and build/run commands, see
+[`ARM_CHROMEBOOK_ARCH_BUILD.md`](ARM_CHROMEBOOK_ARCH_BUILD.md).
+
 ## Target
 
 Build a local, full RetroDECK Flatpak for the aarch64 Chromebook. The first
