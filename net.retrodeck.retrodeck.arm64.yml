@@ -327,6 +327,10 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/ppsspp/artifacts
         dest: components
+      # Ruffle's ARM build is pinned to the GLIBC-compatible Flathub commit.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/ruffle/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop
