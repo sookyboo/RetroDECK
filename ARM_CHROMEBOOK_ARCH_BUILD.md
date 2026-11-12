@@ -235,7 +235,8 @@ Bundled cores and supported systems in this prototype:
 - mGBA: Game Boy Advance.
 - DeSmuME: Nintendo DS. The ARM ES-DE default is set to DeSmuME to match the
   x86 default.
-- Mupen64Plus-Next: Nintendo 64.
+- Mupen64Plus-Next: Nintendo 64. The ARM ES-DE default is set to
+  Mupen64Plus-Next to match the x86 default.
 - SwanStation: PlayStation. The ARM ES-DE default is set to SwanStation to
   match the x86 default.
 
