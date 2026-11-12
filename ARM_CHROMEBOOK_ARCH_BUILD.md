@@ -2,7 +2,7 @@
 
 This guide records the working local workflow used on an AArch64 Chromebook
 running Arch Linux ARM. The ARM RetroDECK prototype packages RetroArch and
-ten ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
+194 ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
 builds the frontend with GLES and validates launching a bundled core.
 
 > **Verified on the Chromebook:** The integrated ARM Flatpak completes first-run
@@ -100,10 +100,15 @@ The wrapper places Alchemist's work directory at:
 This location is on the main disk. On the Chromebook, `/tmp` is a 1.9 GiB
 tmpfs; the first build attempt ran out of space while checking out and copying
 the full Libretro database there. The wrapper now uses the disk-backed path.
-The generated archive is about 432 MiB and contains RetroArch, assets, database
-data, and the ARM cores: Gambatte, Snes9x, Genesis Plus GX, Mesen, GearColeco,
-DOSBox Pure, mGBA, DeSmuME, Mupen64Plus-Next, and SwanStation. The artifacts
-directory is Git-ignored.
+The archive contains RetroArch, assets, database data, core metadata, and all
+194 AArch64 cores whose names match cores in the x86 RetroDECK package. Fourteen
+x86 cores without a matching AArch64 nightly are omitted. The artifacts
+directory is Git-ignored; its size depends on the selected cores and upstream
+nightly builds. The current core-expanded archive is about 822 MiB; the
+installed Flatpak is about 2.4 GiB.
+The omitted x86 core names are `ardens`, `boom3_xp`, `bsnes_hd_beta`,
+`doukutsu_rs`, `fbalpha`, `genesis_plus_gx_paprium`, `mcsoftserve`, `noods`,
+`panda3ds`, `qemu`, `romcleaner`, `sameboy`, `vice_xcbm2`, and `vice_xcbm5x0`.
 
 ## 6. Build the ARM component archives
 
@@ -222,7 +227,8 @@ browse to its host location, for example `/home/duet/Downloads`. This manifest
 grants host filesystem access. The tested `.gbc` ROM loaded and had both video
 and audio.
 
-Bundled cores and supported systems in this prototype:
+The ARM recipe bundles 194 cores with AArch64 builds from the x86 RetroDECK
+core set. Some of the system defaults and prior launch checks are:
 
 - Gambatte: Game Boy and Game Boy Color.
 - Snes9x: Super Nintendo / Super Famicom.
@@ -238,11 +244,13 @@ Bundled cores and supported systems in this prototype:
 - Mupen64Plus-Next: Nintendo 64. The ARM ES-DE default is set to
   Mupen64Plus-Next to match the x86 default.
 - SwanStation: PlayStation. The ARM ES-DE default is set to SwanStation to
-  match the x86 default.
+  match the x86 default, but it freezes at the PlayStation logo on this
+  Chromebook. PCSX-ReARMed and Beetle PSX are bundled alternatives that have
+  not yet been tested here.
 
-These six cores have been added to the ARM bundle and are ready for Chromebook
-verification. Successful packaging does not yet confirm that each system's
-games launch correctly on the device.
+The additional cores are packaged but have not yet been individually tested
+with games on the Chromebook. A matching AArch64 build does not guarantee that
+every core runs well on this device.
 
 ## 10. Known limitations and next work
 
