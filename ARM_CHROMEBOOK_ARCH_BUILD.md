@@ -136,9 +136,11 @@ The PICO-8 archive contains only its component scripts and configuration; it
 does not contain proprietary PICO-8 files. The ES-DE package adds a static
 lookup path for the PICO-8 component launcher.
 
-The PPSSPP builder installs the pinned Flathub app on the host and extracts its
-files into a component archive. Run it on the AArch64 Chromebook so Flatpak
-selects the AArch64 app and runtime. It requires a working Flathub connection.
+The PPSSPP builder resolves the current stable Flathub commit on the host and
+extracts its files into a component archive. Flatpak commit IDs differ by
+architecture, so the ARM builder overrides the shared x86 commit pin with this
+host's AArch64 commit. Run it on the Chromebook; it requires a working Flathub
+connection.
 The archive is written to
 `linux-arm64/ppsspp/artifacts/ppsspp.tar.gz`; the Alchemist library collector
 uses Flatpak's native architecture when collecting runtime libraries.
