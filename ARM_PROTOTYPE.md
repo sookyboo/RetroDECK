@@ -24,27 +24,23 @@ Exclude standalone emulators and optional integrations from the first test.
 
 ## Build blockers
 
-This is a preparation scaffold, not yet a buildable ARM package:
+The first ARM RetroArch component has been built locally and staged into the
+ARM Flatpak manifest. The complete RetroDECK package is still not buildable:
 
-1. The checked out component repository has no prebuilt `artifacts/` archives
-   for ES-DE or RetroArch, and no ARM component archives are present.
+1. ARM artifacts for `framework` and `es-de` are still outstanding.
 2. The existing component recipes select x86_64 releases. An ARM-only
    RetroArch recipe now packages the inspected AArch64 executable with
    architecture-neutral assets and the selected ARM cores. ES-DE's RetroDECK
    fork documents an AArch64 AppImage build script; its ARM component recipe
    and artifact are still outstanding.
-3. `retrodeck_builder.sh` fetches the normal component release by default. The
-   prototype must instead receive explicitly prepared ARM `.tar.gz` component
-   archives; never feed it the current x86_64 release archives.
-4. The ARM manifest is copied from the current manifest and still contains
-   x86_64/amd64 and i386-specific assumptions: the GStreamer search path,
-   rclone binary download, yq binary download, and i386 codec extension/path.
-   Each must be removed, replaced by an architecture-neutral implementation,
-   or supplied from a verified aarch64 source before building.
-5. Review the framework and component scripts for any further x86-only runtime
+3. The ARM manifest stages the built RetroArch artifact in `components/`, which
+   is where `install_components.sh` expects component archives. The Flatpak
+   component installer will consume the ARM RetroArch archive there.
+4. The ARM manifest now uses the Linux ARM64 rclone release, removes the unused
+   yq binary, and drops the i386 codec extension and x86/i386 GStreamer paths.
+   Review the framework and component scripts for any further x86-only runtime
    paths after the first ARM archives are available.
-
-6. Resolve the ES-DE graphics requirement against the Chromebook GPU. The
+5. Resolve the ES-DE graphics requirement against the Chromebook GPU. The
    device reports desktop OpenGL 3.1; ES-DE's AArch64 documentation describes
    an OpenGL 3.3 path and a Mesa version override workaround for OpenGL ES-only
    devices. A version override does not add missing GPU features, so test the
@@ -59,21 +55,13 @@ dependencies have not yet been checked inside KDE Platform 6.11.
 
 ## Next implementation steps
 
-1. Prepare ARM component artifacts in `components/linux-arm64/` using the
-   existing artifact directory layout and archive names consumed by
-   `install_components.sh`.
-2. Build and inspect the ARM RetroArch artifact, then resolve any packaging
-   or KDE runtime dependency issues. Port ES-DE packaging while preserving its
-   RetroDECK launcher, configuration, theme, and component directory layout.
-3. Verify that each selected core is a 64-bit ARM shared library compatible
-   with the RetroArch build; omit custom cores until ARM builds are confirmed.
-4. Resolve the manifest architecture-specific dependencies and paths, then
-   build explicitly for aarch64 with `flatpak-builder --arch=aarch64` and the
-   provided ARM archives.
-5. Install/run the local build and verify RetroDECK -> ES-DE -> RetroArch ->
+1. Port `framework` and ES-DE packaging, preserving the RetroDECK launcher,
+   configuration, theme, and component directory layout.
+2. Build explicitly for aarch64 with `flatpak-builder --arch=aarch64`, then
+   resolve any packaging or KDE runtime dependency issues.
+3. Install/run the local build and verify RetroDECK -> ES-DE -> RetroArch ->
    core launch, OpenGL rendering, controller input, audio, and file access.
 
-No existing x86_64 component recipe or CI workflow has been changed. The
-Alchemist artifact output now accepts an environment override so the ARM
-artifact can be kept separate. No packages were installed and no build was
-run; the ARM RetroArch recipe and component scripts are staged but unexecuted.
+No existing x86_64 component recipe or CI workflow has been changed. The ARM
+RetroArch artifact was built and checked: its executable and three cores are
+AArch64. Its compatibility with KDE Platform 6.11 has not been tested.

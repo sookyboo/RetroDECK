@@ -1,6 +1,5 @@
 # ARM64 prototype scaffold. This is intentionally separate from the standard
-# x86_64 manifest. Do not build until the architecture-specific TODOs in
-# ARM_PROTOTYPE.md are resolved and ARM component archives are supplied.
+# x86_64 manifest. Architecture-specific TODOs remain; see ARM_PROTOTYPE.md.
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #           ______     _            ______ _____ _____  _   __
@@ -17,21 +16,6 @@ runtime: org.kde.Platform
 runtime-version: '6.11'
 sdk: org.kde.Sdk
 command: retrodeck
-
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#
-#                             Extensions
-#                     Additional runtime components
-#
-# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-add-extensions:
-  # FFmpeg libraries and extra codecs, replaces org.freedesktop.Platform.ffmpeg-full
-  org.freedesktop.Platform.codecs_extra.i386:
-    directory: lib/i386-linux-gnu/codecs-extra
-    version: 25.08-extra
-    autodelete: false
-    add-ld-path: lib
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
@@ -76,14 +60,11 @@ finish-args:
   - --filesystem=/run/udev:ro
 
   # GStreamer integration
-  - --env=GST_PLUGIN_SYSTEM_PATH=/app/lib32/gstreamer-1.0:/app/lib/gstreamer-1.0:/usr/lib/i386-linux-gnu/gstreamer-1.0:/usr/lib/x86_64-linux-gnu/gstreamer-1.0
+  - --env=GST_PLUGIN_SYSTEM_PATH=/app/lib/gstreamer-1.0:/usr/lib/aarch64-linux-gnu/gstreamer-1.0
 
   # Gamescope integration
   - --filesystem=xdg-run/gamescope-0:ro
   # - --env=LD_LIBRARY_PATH=/usr/lib/extensions/vulkan/gamescope/lib
-
-  # Multi-arch support (32-bit libs on 64-bit)
-  - --allow=multiarch
 
   # Network 
   - --share=network
@@ -155,8 +136,14 @@ modules:
         # Create the retrodeck directory in the Flatpak destination
         mkdir -p ${FLATPAK_DEST}/retrodeck/
 
-        # Create the version file vital for RetroDECK Framework
-        cp version ${FLATPAK_DEST}/retrodeck/version
+        # Derive the version from metainfo. The normal builder generates a
+        # gitignored version file before flatpak-builder; direct ARM builds do not.
+        VERSION="$(sed -n 's/^[[:space:]]*<release version="\([^"]*\)".*/\1/p' net.retrodeck.retrodeck.metainfo.xml | head -n 1)"
+        if [ -z "$VERSION" ]; then
+          echo "Could not determine RetroDECK version from metainfo."
+          exit 1
+        fi
+        printf '%s\n' "$VERSION" > ${FLATPAK_DEST}/retrodeck/version
 
         # Print the version number to the console
         echo "Version is $(cat ${FLATPAK_DEST}/retrodeck/version)"
@@ -173,7 +160,7 @@ modules:
         mkdir -p ${FLATPAK_DEST}/retrodeck/components
     sources:
       - type: file
-        path: version
+        path: net.retrodeck.retrodeck.metainfo.xml
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
@@ -191,8 +178,8 @@ modules:
       - install -Dm755 rclone "${FLATPAK_DEST}/bin/rclone"
     sources:
       - type: archive
-        url: https://github.com/rclone/rclone/releases/download/v1.69.1/rclone-v1.69.1-linux-amd64.zip
-        sha256: 231841f8d8029ae6cfca932b601b3b50d0e2c3c2cb9da3166293f1c3eae7d79c
+        url: https://github.com/rclone/rclone/releases/download/v1.69.1/rclone-v1.69.1-linux-arm64.zip
+        sha256: a03de8f700fcda7a1aef6b568f88d44218b698fb4e1637596c024d341bb24124
 
   # -------------------------------------------------------------------------
   # rsync - utility for transferring and synchronizing files.
@@ -296,19 +283,6 @@ modules:
       - chmod +x "${FLATPAK_DEST}/bin/xml"
       - ln -s "xml" "${FLATPAK_DEST}/bin/xmlstarlet"
 
-  # -------------------------------------------------------------------------
-  # yq - YAML processor.
-  # -------------------------------------------------------------------------
-
-  - name: yq
-    buildsystem: simple
-    build-commands:
-      - install -Dm755 yq_linux_amd64 ${FLATPAK_DEST}/bin/yq
-    sources:
-      - type: file
-        url: https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
-        sha256: 654d2943ca1d3be2024089eb4f270f4070f491a0610481d128509b2834870049
-
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 #                     RetroDECK: Internal Modules
@@ -326,6 +300,11 @@ modules:
     sources:
       - type: dir
         path: .
+      # Stage the ARM RetroArch component in the directory expected by
+      # automation_tools/install_components.sh.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/retroarch/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop
@@ -378,9 +357,6 @@ modules:
 
       # Installing metainfo
       - install -Dm 644 net.retrodeck.retrodeck.metainfo.xml ${FLATPAK_DEST}/share/metainfo/net.retrodeck.retrodeck.metainfo.xml
-
-      # Prepare codecs-extra location
-      - mkdir -p ${FLATPAK_DEST}/lib/i386-linux-gnu/codecs-extra
 
       # Removing the retrodeck_function_wrapper.sh in non-cooker versions (aka main)
       - |
