@@ -190,10 +190,18 @@ Bundled cores and supported systems in this prototype:
 
 ## 9. Known limitations and next work
 
-- ARM `framework` and ES-DE component artifacts have not been built or
-  integrated. The RetroDECK → ES-DE → RetroArch launch flow is not tested.
-- ES-DE compatibility with this Chromebook's Panfrost OpenGL 3.1 stack still
-  needs to be verified.
+- The ARM framework and ES-DE component artifacts have not been integrated
+  into the full RetroDECK app. The separate ES-DE smoke-test app has rendered
+  through Panfrost and launched a GBC game using bundled ARM RetroArch and
+  Gambatte.
+- ES-DE 3.5.0 has now compiled for AArch64 with its GLES renderer enabled in
+  the KDE 6.11 SDK. Its help and version commands run in the Flatpak build
+  sandbox. Visible rendering has been confirmed on the Chromebook's Panfrost
+  driver through the smoke-test app.
+- The standalone test manifest omits ES-DE's PDF conversion helper because the
+  KDE SDK does not include Poppler. It applies small compatibility edits to
+  ES-DE's SDL/GLES includes and the upstream FreeImage 3.18 module. This is a
+  graphics smoke test, not the finished RetroDECK component build.
 - The RetroArch artifact is built from a dated AArch64 nightly executable and
   current AArch64 core nightlies; the component recipe should be pinned and
   updated deliberately for reproducible builds.
@@ -201,3 +209,32 @@ Bundled cores and supported systems in this prototype:
   input.
 - For a fresh clean build, use the command in section 6. For an already-built
   finalized app directory, export it as in section 7 instead of rebuilding.
+
+### ES-DE GLES smoke test
+
+The test manifest is `net.retrodeck.esde-gles-test.yml`. Build it with two
+parallel jobs to stay within the Chromebook's memory limit:
+
+```bash
+cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
+flatpak-builder --force-clean --jobs=2 --arch=aarch64 \
+  --install-deps-from=flathub \
+  .build-esde-arm64-gles net.retrodeck.esde-gles-test.yml
+```
+
+From a terminal in the Chromebook desktop session, launch the built frontend
+to verify actual GLES rendering on Panfrost:
+
+```bash
+flatpak-builder --run --arch=aarch64 \
+  .build-esde-arm64-gles net.retrodeck.esde-gles-test.yml es-de
+```
+
+The test manifest also bundles the ARM RetroArch component and selected cores,
+and adds their `/app/retrodeck/components/retroarch` paths to ES-DE's ARM find
+rules. ES-DE is compiled with `FLATPAK_BUILD=off` for this test: that upstream
+define prefixes emulator launches with `flatpak-spawn --host`, which cannot see
+emulators bundled inside this app's `/app` tree. The app itself remains a
+Flatpak; this setting makes ES-DE launch bundled emulators inside its sandbox.
+This separate test app validates the ES-DE-to-RetroArch launch path, not the
+full RetroDECK launcher, component preparation, theme, or configuration flow.

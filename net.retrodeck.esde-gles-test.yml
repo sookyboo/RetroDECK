@@ -1,0 +1,107 @@
+# Standalone AArch64 ES-DE GLES smoke-test app.
+# This intentionally uses the ES-DE project's known Flatpak dependency recipe
+# and an older runtime for the isolated graphics test. It is not the final
+# RetroDECK packaging manifest.
+app-id: net.retrodeck.esde.gles.test
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+command: es-de
+
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=dri
+  - --filesystem=home
+
+cleanup:
+  - /include
+  - /share/ffmpeg
+  - /lib/cmake
+  - /lib/pkgconfig
+  - '*.a'
+
+modules:
+  - name: freeimage
+    no-autogen: true
+    build-options:
+      cxxflags: -std=c++14
+      arch:
+        aarch64:
+          cflags: -fPIC -DPNG_ARM_NEON_OPT=0
+          cxxflags: -fPIC
+    sources:
+      - type: archive
+        url: https://downloads.sourceforge.net/freeimage/FreeImage3180.zip
+        sha256: f41379682f9ada94ea7b34fe86bf9ee00935a3147be41b6569c9605a53e438fd
+      - type: shell
+        commands:
+          - sed -i 's|-o root -g root ||' ./Makefile.gnu
+          - sed -i 's|/usr|/app|' ./Makefile.gnu
+          - "sed -i '/#include <stdio.h>/a #include <unistd.h>' Source/ZLib/gzguts.h"
+          - sed -i 's/_byteswap_ulong/__builtin_bswap32/g' Source/LibJXR/image/decode/segdec.c
+          - "sed -i '1i #include <wchar.h>' Source/LibJXR/jxrgluelib/JXRGlueJxr.c"
+
+  - name: libgit2
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_SHARED_LIBS=ON
+      - -DBUILD_TESTS=OFF
+      - -DBUILD_CLI=OFF
+      - -DBUILD_EXAMPLES=OFF
+      - -DUSE_SSH=OFF
+    sources:
+      - type: git
+        url: https://github.com/libgit2/libgit2.git
+        tag: v1.9.7
+
+  - name: pugixml
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DBUILD_SHARED_LIBS=on
+      - -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+    sources:
+      - type: archive
+        url: https://github.com/zeux/pugixml/releases/download/v1.11.4/pugixml-1.11.4.tar.gz
+        sha256: 8ddf57b65fb860416979a3f0640c2ad45ddddbbafa82508ef0a0af3ce7061716
+
+  - name: es-de
+    buildsystem: cmake-ninja
+    config-opts:
+      # This is still packaged as a Flatpak, but the ES-DE FLATPAK_BUILD
+      # define forces every emulator command through flatpak-spawn --host.
+      # RetroDECK bundles its emulators inside this app, so launch them in
+      # the same sandbox instead.
+      - -DFLATPAK_BUILD=off
+      - -DRETRODECK=on
+      - -DGLES=on
+      - -DGL=off
+      - -DAPPLICATION_UPDATER=off
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: git
+        url: https://github.com/RetroDECK/ES-DE.git
+        commit: 15e1b236eafd2864bd99ffcc9853d2efa2a3916c
+      # Poppler is not present in the KDE 6.11 SDK. Omit only the PDF helper
+      # from this graphics smoke test; the final component must build/package it.
+      - type: shell
+        commands:
+          - python3 -c 'from pathlib import Path; p=Path("resources/systems/linuxarm/es_find_rules.xml"); s=p.read_text(); s=s.replace("        <rule type=\"staticpath\">", "        <rule type=\"staticpath\">\n            <entry>/app/retrodeck/components/retroarch/bin/retroarch</entry>", 1); p.write_text(s)'
+          - python3 -c 'from pathlib import Path; p=Path("resources/systems/linuxarm/es_find_rules.xml"); s=p.read_text(); s=s.replace("        <rule type=\"corepath\">", "        <rule type=\"corepath\">\n            <entry>/app/retrodeck/components/retroarch/rd_extras/cores</entry>", 1); p.write_text(s)'
+          - sed -i '\|#include <SDL2/SDL_opengles.h>|d' es-core/src/renderers/ShaderOpenGL.h es-core/src/renderers/RendererOpenGL.h
+          - "sed -i '/GLES3.*gl3.h/a #include <GLES2/gl2ext.h>' es-core/src/renderers/ShaderOpenGL.h"
+          - sed -i '/^add_subdirectory(es-pdf-converter)$/d' CMakeLists.txt
+          - sed -i '/^add_dependencies(lunasvg es-pdf-convert)$/d' CMakeLists.txt
+          - sed -i '/^    add_dependencies(es-pdf-convert localization)$/d' CMakeLists.txt
+          - sed -i '/install(TARGETS es-pdf-convert RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}\/bin)/d' es-app/CMakeLists.txt
+
+  - name: retroarch-component
+    buildsystem: simple
+    build-commands:
+      - install -d ${FLATPAK_DEST}/retrodeck/components/retroarch
+      - cp -a . ${FLATPAK_DEST}/retrodeck/components/retroarch/
+    sources:
+      - type: archive
+        path: ../components-arm-prototype/linux-arm64/retroarch/artifacts/retroarch.tar.gz

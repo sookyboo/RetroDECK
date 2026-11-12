@@ -30,12 +30,16 @@ Exclude standalone emulators and optional integrations from the first test.
 The first ARM RetroArch component has been built locally and staged into the
 ARM Flatpak manifest. The complete RetroDECK package is still not buildable:
 
-1. ARM artifacts for `framework` and `es-de` are still outstanding.
+1. ARM artifacts for `framework` and the integrated `es-de` component are
+   still outstanding. A separate AArch64 ES-DE 3.5.0 GLES smoke-test build now
+   compiles and starts in the KDE 6.11 Flatpak sandbox; it has rendered on
+   Panfrost and launched a GBC game through the bundled ARM RetroArch/Gambatte.
 2. The existing component recipes select x86_64 releases. An ARM-only
    RetroArch recipe now packages the inspected AArch64 executable with
    architecture-neutral assets and the selected ARM cores. ES-DE's RetroDECK
    fork documents an AArch64 AppImage build script; its ARM component recipe
-   and artifact are still outstanding.
+   and artifact are still outstanding. The standalone GLES smoke-test manifest
+   omits the PDF conversion helper.
 3. The ARM manifest stages the built RetroArch artifact in `components/`, which
    is where `install_components.sh` expects component archives. The Flatpak
    component installer will consume the ARM RetroArch archive there.
@@ -43,11 +47,8 @@ ARM Flatpak manifest. The complete RetroDECK package is still not buildable:
    yq binary, and drops the i386 codec extension and x86/i386 GStreamer paths.
    Review the framework and component scripts for any further x86-only runtime
    paths after the first ARM archives are available.
-5. Resolve the ES-DE graphics requirement against the Chromebook GPU. The
-   device reports desktop OpenGL 3.1; ES-DE's AArch64 documentation describes
-   an OpenGL 3.3 path and a Mesa version override workaround for OpenGL ES-only
-   devices. A version override does not add missing GPU features, so test the
-   frontend on the actual Panfrost stack before accepting this path.
+5. Carry the validated standalone ES-DE GLES and RetroArch launch setup into
+   the integrated ARM component build, including the in-sandbox launch behavior.
 
 The RetroArch executable archive has now been inspected locally. It contains
 one dynamically linked AArch64 executable, with host dependencies including
