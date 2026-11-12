@@ -2,7 +2,7 @@
 
 This guide records the working local workflow used on an AArch64 Chromebook
 running Arch Linux ARM. The ARM RetroDECK prototype packages RetroArch and
-four ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
+ten ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
 builds the frontend with GLES and validates launching a bundled core.
 
 > **Verified on the Chromebook:** The integrated ARM Flatpak completes first-run
@@ -100,8 +100,9 @@ The wrapper places Alchemist's work directory at:
 This location is on the main disk. On the Chromebook, `/tmp` is a 1.9 GiB
 tmpfs; the first build attempt ran out of space while checking out and copying
 the full Libretro database there. The wrapper now uses the disk-backed path.
-The generated archive is about 424 MiB and contains RetroArch, assets, database
-data, and the Gambatte, Snes9x, and Genesis Plus GX cores. The artifacts
+The generated archive is about 432 MiB and contains RetroArch, assets, database
+data, and the ARM cores: Gambatte, Snes9x, Genesis Plus GX, Mesen, GearColeco,
+DOSBox Pure, mGBA, DeSmuME, Mupen64Plus-Next, and SwanStation. The artifacts
 directory is Git-ignored.
 
 ## 6. Build the ARM component archives
@@ -141,7 +142,8 @@ run when invoking Flatpak Builder directly.
 
 ```bash
 cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
-flatpak-builder --force-clean --arch=aarch64 --install-deps-from=flathub \
+flatpak-builder --user --force-clean --arch=aarch64 --jobs=2 \
+  --disable-updates --disable-rofiles-fuse --install-deps-from=flathub \
   build-arm64 net.retrodeck.retrodeck.arm64.yml
 ```
 
@@ -183,7 +185,10 @@ reports that the directory is already finalized, skip `build-finish`.
 For later rebuilds, rerun the build command in section 7, export to the same
 branch, then update it with
 `flatpak update --user net.retrodeck.retrodeck//arm-prototype`. Exporting and
-installing the branch do not rebuild the app.
+installing the branch do not rebuild the app. On this host, `build-export`
+requires host network access for icon validation; if a sandbox reports
+`NETLINK_ROUTE` permission errors, rerun that export command with the required
+host permissions.
 
 ## 9. Run RetroArch and test a Game Boy Color ROM
 
@@ -225,6 +230,18 @@ Bundled cores and supported systems in this prototype:
 - Mesen: Nintendo Entertainment System (NES) and Famicom. This matches the
   default NES core in the x86 and ARM ES-DE system definitions. NES game launch
   through Mesen was confirmed on the Chromebook.
+- GearColeco: ColecoVision. The ARM ES-DE default is set to GearColeco.
+- DOSBox Pure: DOS.
+- mGBA: Game Boy Advance.
+- DeSmuME: Nintendo DS. The ARM ES-DE default is set to DeSmuME to match the
+  x86 default.
+- Mupen64Plus-Next: Nintendo 64.
+- SwanStation: PlayStation. The ARM ES-DE default is set to SwanStation to
+  match the x86 default.
+
+These six cores have been added to the ARM bundle and are ready for Chromebook
+verification. Successful packaging does not yet confirm that each system's
+games launch correctly on the device.
 
 ## 10. Known limitations and next work
 
