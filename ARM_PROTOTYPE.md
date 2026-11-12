@@ -133,23 +133,24 @@ smoke-test-only workarounds.
   ran the ES-DE scraper, and launched a Game Boy game. The ARM manifest links
   ES-DE's component resources into `/app/share/es-de`, as required by its
   `/app` install prefix.
+- A Bluetooth Xbox controller works; pressing LS and RS together opens the
+  RetroArch menu, including its save option. Game Boy game saves also work.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 
 ### Still outstanding
 
-1. Verify theme/config loading, ROM discovery, RetroArch core launch,
-   audio/video, controller input, save/config writes, and restart behavior.
-   Startup logs missing Steam ROM Manager helper functions because that
-   component is not bundled in this prototype.
+1. Verify theme/config loading and restart behavior. Startup logs missing
+   Steam ROM Manager helper functions because that component is not bundled in
+   this prototype.
 2. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern for component recipes before broadening the
    ARM core/emulator list.
 
 ## Recommended continuation sequence
 
-1. Finish verifying integrated input, saves, and restart behavior; triage the
-   missing Steam ROM Manager helper messages.
+1. Finish verifying restart behavior; triage the missing Steam ROM Manager
+   helper messages.
 2. Check the x86_64 build remains unchanged and choose a maintainable
    architecture-selection pattern before broadening the ARM core/emulator list.
 3. Record successful commands/results here and in the Chromebook build guide;
