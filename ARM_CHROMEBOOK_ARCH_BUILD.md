@@ -5,11 +5,11 @@ running Arch Linux ARM. The ARM RetroDECK prototype packages RetroArch and
 four ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
 builds the frontend with GLES and validates launching a bundled core.
 
-> **Scope:** RetroArch and ES-DE have each been tested inside Flatpak apps, and
-> ES-DE successfully launched a Game Boy Color ROM through bundled RetroArch
-> and Gambatte. This does not yet validate the integrated RetroDECK framework,
-> first-run setup, theme, or configuration flow; ARM `framework` and integrated
-> ES-DE component artifacts remain outstanding.
+> **Verified on the Chromebook:** The integrated ARM Flatpak completes first-run
+> setup, runs ES-DE scraping, and launches Game Boy, SNES, Mega Drive, Master
+> System, Game Gear, Sega CD, NES through Mesen, and PICO-8 games. An Xbox
+> Bluetooth controller works, and RetroArch save states and Game Boy saves were
+> confirmed. Steam ROM Manager and PortMaster remain deferred.
 
 ## 1. Check the machine and GPU
 
@@ -223,13 +223,13 @@ Bundled cores and supported systems in this prototype:
 - Snes9x: Super Nintendo / Super Famicom.
 - Genesis Plus GX: Genesis / Mega Drive, Master System, Game Gear, and Sega CD.
 - Mesen: Nintendo Entertainment System (NES) and Famicom. This matches the
-  default NES core in the x86 and ARM ES-DE system definitions. Rebuild the
-  RetroArch artifact to include it; an on-device launch test is still needed.
+  default NES core in the x86 and ARM ES-DE system definitions. NES game launch
+  through Mesen was confirmed on the Chromebook.
 
 ## 10. Known limitations and next work
 
-- Framework and ES-DE component archives were built, and the full ARM manifest
-  completed with all three components staged. The integrated `arm-prototype`
+- Framework, ES-DE, PICO-8, and RetroArch component archives were built, and the
+  full ARM manifest completed with all four components staged. The integrated `arm-prototype`
   branch has launched successfully: the first-run Zenity wizard completed,
   ES-DE's scraper ran, and a Game Boy game launched. The separate ES-DE
   smoke-test app also rendered through Panfrost and launched a GBC game using
@@ -241,6 +241,10 @@ Bundled cores and supported systems in this prototype:
   Genesis Plus GX for Mega Drive/Genesis, Master System, Game Gear, and Sega CD
   games. Sega CD required its BIOS files in RetroDECK's configured BIOS
   directory.
+- NES launch through the bundled Mesen RetroArch core and PICO-8 launch through
+  the user's licensed AArch64 `pico8_64` executable were also confirmed in the
+  integrated app. PICO-8's own files remain outside the Flatpak component
+  archive.
 - The ARM manifest exposes ES-DE component data at `/app/share/es-de`, the
   path expected by the binary built with `/app` as its install prefix.
 - ES-DE 3.5.0 has now compiled for AArch64 with its GLES renderer enabled in
@@ -363,6 +367,6 @@ The ES-DE component packaging script also adds the PICO-8 launcher to the
 Linux ARM emulator discovery rules. Rebuild that archive when rebuilding
 ES-DE. Then build and install RetroDECK with the clean-build command in
 section 7, export it as in section 8, and run the `arm-prototype` branch.
-The PICO-8 launch still needs an on-device verification with a cartridge from
-`$roms_path/pico8`; verify the game starts and that cartridge-created saves
-appear under `$saves_path/pico-8`.
+PICO-8 launch was confirmed on the Chromebook with a cartridge from
+`$roms_path/pico8`. Its save path is configured under `$saves_path/pico-8`, but
+PICO-8 save-file persistence has not been separately verified.
