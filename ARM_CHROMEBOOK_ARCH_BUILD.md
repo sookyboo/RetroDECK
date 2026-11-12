@@ -2,7 +2,7 @@
 
 This guide records the working local workflow used on an AArch64 Chromebook
 running Arch Linux ARM. The ARM RetroDECK prototype packages RetroArch and
-three ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
+four ARM64 Libretro cores in KDE Platform 6.11. A separate ES-DE test app
 builds the frontend with GLES and validates launching a bundled core.
 
 > **Scope:** RetroArch and ES-DE have each been tested inside Flatpak apps, and
@@ -222,6 +222,9 @@ Bundled cores and supported systems in this prototype:
 - Gambatte: Game Boy and Game Boy Color.
 - Snes9x: Super Nintendo / Super Famicom.
 - Genesis Plus GX: Genesis / Mega Drive, Master System, Game Gear, and Sega CD.
+- Mesen: Nintendo Entertainment System (NES) and Famicom. This matches the
+  default NES core in the x86 and ARM ES-DE system definitions. Rebuild the
+  RetroArch artifact to include it; an on-device launch test is still needed.
 
 ## 10. Known limitations and next work
 
