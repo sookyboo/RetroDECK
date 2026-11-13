@@ -138,10 +138,11 @@ smoke-test-only workarounds.
   BIOS files in RetroDECK's configured BIOS directory.
 - A Bluetooth Xbox controller works; pressing LS and RS together opens the
   RetroArch menu, including its save option. Game Boy game saves also work.
-- PortMaster ARM packaging is in progress. Its archive includes AArch64 helper
-  binaries, and the component now adapts its launcher/control paths to Flatpak
-  `XDG_DATA_HOME` while preserving user data on reset. It has not yet been built
-  into or tested in the app. Steam ROM Manager remains deferred.
+- PortMaster ARM games launch on the Chromebook. `gptokeyb` needs host access to
+  `/dev/uinput` to translate controller input into virtual keyboard and mouse
+  events. A temporary ACL allowed the Flatpak to open the device; persistent
+  host setup is documented below. Steam Deck already allows this through its
+  SteamOS device rules. Steam ROM Manager remains deferred.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 
@@ -181,3 +182,61 @@ smoke-test-only workarounds.
 - RetroArch config switches to OpenGL and uses the AArch64 core-download URL.
   The standalone RetroArch binary dependencies were inspected on the host but
   have only been proven at runtime inside the KDE 6.11 Flatpak via game launch.
+
+## PortMaster controller-to-keyboard and mouse input
+
+PortMaster ports use `gptokeyb`/`gptokeyb2` to translate gamepad input into
+keyboard and mouse events through Linux `/dev/uinput`. The kernel restricts
+this device by default. RetroDECK's Flatpak already grants device access with
+`--device=all`, but the host must also permit the logged-in user to open
+`/dev/uinput`. See the [Linux kernel uinput documentation](https://docs.kernel.org/input/uinput.html).
+
+### Temporary permission for the current device node
+
+To grant the current user access until `/dev/uinput` is recreated (usually at
+reboot), run:
+
+```bash
+sudo setfacl -m "u:$(id -un):rw" /dev/uinput
+getfacl /dev/uinput
+```
+
+The ACL should list the current username with `rw-`. This is a quick test and
+does not persist after the device node is recreated.
+
+### Persistent permission
+
+Add a udev rule that grants `/dev/uinput` access to the active local session.
+This does not require Steam or Steam Input. It uses the same udev access
+mechanism as Valve's Steam device rule:
+
+```bash
+sudo tee /etc/udev/rules.d/60-retrodeck-uinput.rules >/dev/null <<'EOF'
+KERNEL=="uinput", SUBSYSTEM=="misc", TAG+="uaccess", OPTIONS+="static_node=uinput"
+EOF
+
+echo uinput | sudo tee /etc/modules-load.d/uinput.conf
+sudo modprobe uinput
+sudo udevadm control --reload-rules
+sudo udevadm trigger --action=add --subsystem-match=misc --sysname-match=uinput
+getfacl /dev/uinput
+```
+
+If the ACL is still missing, log out and back in, then check it again. This
+permission allows trusted applications running as the active user to create
+virtual input devices, including keyboards and mice; only enable it on systems
+where that capability is intended. After changing host permissions, verify
+RetroDECK can open `/dev/uinput` from inside its Flatpak.
+
+Alternatively, if Steam device rules are already desired on the system, the
+optional `steam-devices` package provides related rules on Ubuntu
+(`sudo apt install steam-devices`), Fedora (`sudo dnf install steam-devices`),
+and Arch Linux x86_64 (`sudo pacman -S steam-devices`). It is not a RetroDECK
+dependency. Steam Deck already has the required permission through its SteamOS
+device rules.
+
+The udev rule location and behavior follow the
+[ArchWiki udev documentation](https://wiki.archlinux.org/title/Udev); see also
+[Valve's rule](https://github.com/ValveSoftware/steam-devices/blob/master/60-steam-input.rules)
+and package listings for [Ubuntu](https://packages.ubuntu.com/noble/all/steam-devices/filelist)
+and [Fedora](https://packages.fedoraproject.org/pkgs/steam-devices/steam-devices/).

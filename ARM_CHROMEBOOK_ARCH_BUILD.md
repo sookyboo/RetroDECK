@@ -540,7 +540,10 @@ before adding one to the ARM manifest.
 ### SRM and PortMaster integration status
 
 Steam ROM Manager (SRM) remains deferred. PortMaster packaging work has been
-added to the ARM branch, but it is not yet built into or tested in the Flatpak.
+added to the ARM branch and built into the Flatpak. An individual ARM port was
+confirmed to launch; controller-to-keyboard and mouse emulation needs host
+`/dev/uinput` access as described below. Full GUI, display, networking, and
+broader port compatibility remain to be verified.
 
 - **SRM:** RetroDECK uses SRM to add RetroDECK and ES-DE favorites to Steam,
   including artwork and shortcut management. The current Flatpak recipe
@@ -556,11 +559,16 @@ added to the ARM branch, but it is not yet built into or tested in the Flatpak.
   user's PortMaster data on reset. Its SDL libraries come from KDE 6.7 and
   liblzma from Freedesktop 25.08. The component build currently needs those
   runtimes from Flathub; the attempt in this environment stopped because DNS
-  could not resolve `flathub.org`. After building, test the GUI, controller,
-  display, networking, and individual ARM ports on Panfrost/KDE. PortMaster's
+  could not resolve `flathub.org`. Continue testing the GUI, controller,
+  display, networking, and more ARM ports on Panfrost/KDE. PortMaster's
   [supported devices](https://portmaster.games/installation/supported-handhelds/)
   page focuses on handheld custom firmware, so it does not establish Chromebook
   compatibility; see also [runtime architectures](https://portmaster.games/installation/runtimes/).
+  Controller-to-keyboard and mouse emulation also needs host access to
+  `/dev/uinput`; Flatpak `--device=all` does not override host node permissions.
+  Temporary ACL and persistent udev-rule setup (independent of Steam), plus
+  optional distro `steam-devices` packages, are documented in
+  [ARM_PROTOTYPE.md](ARM_PROTOTYPE.md#portmaster-controller-to-keyboard-and-mouse-input).
 - SRM and PortMaster remain unverified as complete Chromebook integrations.
 
 ### ES-DE GLES smoke test
