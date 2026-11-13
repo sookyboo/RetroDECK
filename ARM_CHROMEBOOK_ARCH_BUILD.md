@@ -353,7 +353,48 @@ The additional cores are packaged but have not yet been individually tested
 with games on the Chromebook. A matching AArch64 build does not guarantee that
 every core runs well on this device.
 
-## 10. Known limitations and next work
+## 10. Engine and emulator porting inventory
+
+This is the ARM Chromebook prototype inventory for the engines and emulators
+listed in RetroDECK's component catalog. It records the packaging approach
+identified for the x86 RetroDECK build, whether an ARM route was identified,
+and the prototype's current status. ARM availability is an initial assessment,
+not a guarantee that a component will build or run well on this Chromebook.
+
+### Engines
+
+| Component | x86 RetroDECK packaging | ARM route identified | ARM prototype status |
+|---|---|---|---|
+| IkemenGO / M.U.G.E.N | Bundled component | Ikemen GO's Go code may be portable; legacy M.U.G.E.N is a separate compatibility question | Not started |
+| OpenBOR | Bundled component | Native ARM source build appears feasible | Not started |
+| PICO-8 | User supplies licensed files | User's copy contains an AArch64 binary | Integrated; game launch confirmed |
+| ScummVM | Standalone component; RetroArch core also available | AArch64 Flathub app and RetroArch core are available; standalone uses a pinned older compatible app build | Standalone integrated and launch tested; fullscreen defaults now apply after component reset |
+| Solarus | Bundled component | Native ARM source build appears feasible | Not started |
+| UZDoom | Bundled component | ARM source build appears feasible; graphics compatibility needs testing | Not started |
+
+### Emulators
+
+| Component | x86 RetroDECK packaging | ARM route identified | ARM prototype status |
+|---|---|---|---|
+| Azahar | Bundled standalone emulator | ARM64 route needs runtime and device compatibility checks | Not started |
+| Cemu | Bundled standalone emulator | ARM support and build feasibility need checking | Not started |
+| Dolphin | Bundled standalone emulator | ARM64 builds/source are available; graphics and performance need device testing | Not started |
+| DuckStation (Legacy) | Bundled standalone emulator | ARM64 support/build route needs checking | Not started |
+| melonDS | Bundled standalone emulator | Native ARM build appears feasible | Not started |
+| PCSX2 | Bundled standalone emulator | ARM64 compatibility and Chromebook performance need investigation | Not started |
+| PPSSPP | Standalone Flatpak and RetroArch core | AArch64 Flathub app and core are available; standalone uses a pinned older compatible app build | Integrated; standalone game launch confirmed; config reset was needed to apply defaults |
+| PrimeHack | Bundled standalone emulator | ARM support and dependencies need investigation | Not started |
+| RPCS3 | Bundled standalone emulator | Not identified as a practical target for this Chromebook prototype | Not started |
+| Ruffle | Flatpak | AArch64 Flathub build is available; prototype pins an older runtime-compatible commit | Integrated; Flash game launch confirmed. Controller mapping was not working; docs recommend keyboard and mouse |
+| Vita3K | Bundled standalone emulator | ARM64 support/build feasibility needs checking | Not started |
+| xemu | Bundled standalone emulator | ARM support/build feasibility needs checking | Not started |
+| XRoar | Bundled standalone emulator | Native ARM source build appears feasible | Not started |
+
+The components marked “not started” are inventory only. Validate upstream
+architecture support, runtime requirements, graphics backend, and performance
+before adding one to the ARM manifest.
+
+## 11. Known limitations and next work
 
 - Framework, ES-DE, PICO-8, PPSSPP, and RetroArch component archives were built,
   and the full ARM manifest completed with all five components staged. A PSP
