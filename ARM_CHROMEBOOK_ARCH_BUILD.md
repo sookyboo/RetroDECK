@@ -180,7 +180,12 @@ Launch testing exposed both the display-name/target-ID mismatch and the extra
 quoting; rebuild ES-DE to include the corrected auto-detect command. The
 ScummVM component archive includes `sky.cpt` under `scummvm/`, and its launcher
 passes that directory as `--extrapath` for engine data such as Beneath a Steel
-Sky's required file.
+Sky's required file. On a Configurator reset, the ScummVM component copies its
+bundled `scummvm.ini` defaults into the user's config and substitutes the
+current RetroDECK saves, ROMs, and bundled soundfont paths. This includes
+`fullscreen=true`; reset ScummVM once after rebuilding to apply these defaults
+to an existing profile. The reset replaces that ScummVM config file, so save a
+copy first if you have custom ScummVM settings to keep.
 archive is written to
 `linux-arm64/scummvm/artifacts/scummvm.tar.gz`. After building, extract it and
 inspect the AArch64 binary before rebuilding RetroDECK:
