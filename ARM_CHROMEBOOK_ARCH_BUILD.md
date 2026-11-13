@@ -172,11 +172,12 @@ Linux ARM ScummVM system definition: RetroArch's ScummVM core remains the
 default, and standalone ScummVM is available as an alternate emulator. The
 ES-DE build adds the bundled launcher to the `SCUMMVM` static-path lookup. The
 ARM standalone command auto-detects a game in `%GAMEDIR%`; the ScummVM
-descriptor target ID is not necessarily the folder's display name. The x86
+descriptor target ID is not necessarily the folder's display name. Leave
+`%GAMEDIR%` unquoted because ES-DE already escapes spaces for the shell. The x86
 Linux ES-DE definition leaves standalone ScummVM commented out, so this ARM
 standalone path is a new integration and is not confirmed by the x86 behavior.
-The first launch exposed that distinction; rebuild ES-DE to include the
-auto-detect command. The
+Launch testing exposed both the display-name/target-ID mismatch and the extra
+quoting; rebuild ES-DE to include the corrected auto-detect command. The
 archive is written to
 `linux-arm64/scummvm/artifacts/scummvm.tar.gz`. After building, extract it and
 inspect the AArch64 binary before rebuilding RetroDECK:
