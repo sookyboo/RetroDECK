@@ -170,7 +170,10 @@ commit matches the requested pin and fails if the pinned update cannot be
 downloaded. The component keeps the upstream
 Linux ARM ScummVM system definition: RetroArch's ScummVM core remains the
 default, and standalone ScummVM is available as an alternate emulator. The
-ES-DE build adds the bundled launcher to the `SCUMMVM` static-path lookup. The
+ES-DE build adds the bundled launcher to the `SCUMMVM` static-path lookup and
+quotes `%BASENAME%` in the standalone command so game IDs containing spaces
+are passed as one argument. The first game launch exposed this quoting issue;
+rebuild ES-DE to include the fix. The
 archive is written to
 `linux-arm64/scummvm/artifacts/scummvm.tar.gz`. After building, extract it and
 inspect the AArch64 binary before rebuilding RetroDECK:
@@ -185,8 +188,8 @@ readelf --version-info .tmp-scummvm-inspect/bin/scummvm |
 
 Accept a future replacement binary only if its highest GLIBC requirement is
 no newer than 2.42. The pinned component archive was built and its GLIBC
-compatibility was verified. A game launch through RetroDECK remains to be
-tested.
+compatibility was verified. Retest a ScummVM game with spaces in its ID after
+rebuilding ES-DE and the full Flatpak.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
