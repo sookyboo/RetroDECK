@@ -216,13 +216,20 @@ The standalone ARM components Azahar, Dolphin, melonDS, and MAME are extracted
 from native AArch64 Flathub builds. Their app commits and inspected maximum
 GLIBC symbol versions are:
 
-| Component | AArch64 app commit | Runtime branch | Maximum GLIBC |
-| --- | --- | --- | --- |
-| Azahar | `39d1b884780a727499b59de097ef09aa507b23bd4340205ded4ba2c3b44020c6` | KDE 6.11 | 2.42 |
-| Dolphin | `a22e93a81ac2898f9a4cd69bbcbaa7b8de52262f7b6f5cc4eb18211a3bd25d7e` | KDE 6.11 | 2.38 |
-| melonDS | `7d673f2d9516adb6f959b0a71449007725eff7781c6f7ce6c1064c39f6b0c18e` | KDE 6.10 | 2.38 |
-| MAME | `7e0da1bbaea5667b53c6bb7c1e84c2705304d19a8dbb7ec3dcf69967d1d31043` | KDE 6.11 | 2.38 |
-| xemu | `56e940a8b2ec81291df431867bf082f94068f1856beb231e4ee2225a4bb1274c` | Freedesktop 25.08 | 2.42 (executable) |
+| Component | AArch64 app commit | Runtime branch | Maximum GLIBC | Configuration vs x86 | Configurator reset wiring |
+| --- | --- | --- | --- | --- | --- |
+| Azahar | `39d1b884780a727499b59de097ef09aa507b23bd4340205ded4ba2c3b44020c6` | KDE 6.11 | 2.42 | Same component config, manifest, and scripts | Hook and defaults bundled; ARM reset not yet run |
+| Dolphin | `a22e93a81ac2898f9a4cd69bbcbaa7b8de52262f7b6f5cc4eb18211a3bd25d7e` | KDE 6.11 | 2.38 | Same component config, manifest, and scripts | Hook and defaults bundled; ARM reset not yet run |
+| melonDS | `7d673f2d9516adb6f959b0a71449007725eff7781c6f7ce6c1064c39f6b0c18e` | KDE 6.10 | 2.38 | Same component config, manifest, and scripts | Hook and defaults bundled; ARM reset not yet run |
+| MAME | `7e0da1bbaea5667b53c6bb7c1e84c2705304d19a8dbb7ec3dcf69967d1d31043` | KDE 6.11 | 2.38 | Same component config, manifest, and scripts | Hook and defaults bundled; ARM reset not yet run |
+| xemu | `56e940a8b2ec81291df431867bf082f94068f1856beb231e4ee2225a4bb1274c` | Freedesktop 25.08 | 2.42 (executable) | Same component config, manifest, and scripts | Hook and defaults bundled; ARM reset not yet run |
+
+“Same component config, manifest, and scripts” means the component source
+directories were compared directly with the x86 `components` checkout; no
+differences were found for these five components. Each ARM packaging recipe
+includes its `component_prepare.sh` and `rd_config` defaults. This confirms
+the reset path is packaged, but the Configurator reset itself still needs an
+ARM runtime check for each emulator.
 
 The current xemu AArch64 app uses Freedesktop 26.08 and requires GLIBC 2.44,
 newer than RetroDECK's KDE 6.11 runtime (GLIBC 2.42). The ARM recipe therefore
