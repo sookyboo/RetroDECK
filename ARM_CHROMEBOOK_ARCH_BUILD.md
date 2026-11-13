@@ -178,6 +178,9 @@ Linux ES-DE definition leaves standalone ScummVM commented out, so this ARM
 standalone path is a new integration and is not confirmed by the x86 behavior.
 Launch testing exposed both the display-name/target-ID mismatch and the extra
 quoting; rebuild ES-DE to include the corrected auto-detect command. The
+ScummVM component archive includes `sky.cpt` under `scummvm/`, and its launcher
+passes that directory as `--extrapath` for engine data such as Beneath a Steel
+Sky's required file.
 archive is written to
 `linux-arm64/scummvm/artifacts/scummvm.tar.gz`. After building, extract it and
 inspect the AArch64 binary before rebuilding RetroDECK:
