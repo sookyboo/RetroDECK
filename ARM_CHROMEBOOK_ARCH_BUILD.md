@@ -366,6 +366,11 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/ruffle/build-component.sh
 ./linux-arm64/scummvm/build-component.sh
 ./linux-arm64/es-de/build-component.sh
+./linux-arm64/azahar/build-component.sh
+./linux-arm64/dolphin/build-component.sh
+./linux-arm64/melonds/build-component.sh
+./linux-arm64/mame/build-component.sh
+./linux-arm64/xemu/build-component.sh
 
 cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
 
