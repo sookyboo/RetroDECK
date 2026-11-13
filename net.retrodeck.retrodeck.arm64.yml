@@ -335,6 +335,24 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/scummvm/artifacts
         dest: components
+      # Native AArch64 Flathub emulator components. Their pinned app commits
+      # and runtime GLIBC requirements are recorded in the ARM build guide.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/azahar/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/dolphin/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/melonds/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/mame/artifacts
+        dest: components
+      # xemu is pinned to an older AArch64 Flathub build for KDE 6.11 GLIBC.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/xemu/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop

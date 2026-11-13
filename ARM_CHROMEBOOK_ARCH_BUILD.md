@@ -113,7 +113,8 @@ The omitted x86 core names are `ardens`, `boom3_xp`, `bsnes_hd_beta`,
 ## 6. Build the ARM component archives
 
 The ARM Flatpak manifest expects RetroArch, framework, ES-DE, PICO-8, PPSSPP,
-Ruffle, and ScummVM component archives in the sibling components worktree.
+Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME, and xemu component archives
+in the sibling components worktree.
 Generate them before building the full app:
 
 ```bash
@@ -125,6 +126,11 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/ruffle/build-component.sh
 ./linux-arm64/scummvm/build-component.sh
 ./linux-arm64/es-de/build-component.sh
+./linux-arm64/azahar/build-component.sh
+./linux-arm64/dolphin/build-component.sh
+./linux-arm64/melonds/build-component.sh
+./linux-arm64/mame/build-component.sh
+./linux-arm64/xemu/build-component.sh
 ```
 
 The ES-DE builder uses the successful GLES smoke-test manifest and requires
@@ -203,6 +209,78 @@ no newer than 2.42. The pinned component archive was built and its GLIBC
 compatibility was verified. Retest standalone ScummVM by launching a game
 directory containing a `.scummvm` descriptor after rebuilding ES-DE and the
 full Flatpak.
+
+### AArch64 Flathub emulators and GLIBC checks
+
+The standalone ARM components Azahar, Dolphin, melonDS, and MAME are extracted
+from native AArch64 Flathub builds. Their app commits and inspected maximum
+GLIBC symbol versions are:
+
+| Component | AArch64 app commit | Runtime branch | Maximum GLIBC |
+| --- | --- | --- | --- |
+| Azahar | `39d1b884780a727499b59de097ef09aa507b23bd4340205ded4ba2c3b44020c6` | KDE 6.11 | 2.42 |
+| Dolphin | `a22e93a81ac2898f9a4cd69bbcbaa7b8de52262f7b6f5cc4eb18211a3bd25d7e` | KDE 6.11 | 2.38 |
+| melonDS | `7d673f2d9516adb6f959b0a71449007725eff7781c6f7ce6c1064c39f6b0c18e` | KDE 6.10 | 2.38 |
+| MAME | `7e0da1bbaea5667b53c6bb7c1e84c2705304d19a8dbb7ec3dcf69967d1d31043` | KDE 6.11 | 2.38 |
+| xemu | `56e940a8b2ec81291df431867bf082f94068f1856beb231e4ee2225a4bb1274c` | Freedesktop 25.08 | 2.42 (executable) |
+
+The current xemu AArch64 app uses Freedesktop 26.08 and requires GLIBC 2.44,
+newer than RetroDECK's KDE 6.11 runtime (GLIBC 2.42). The ARM recipe therefore
+pins an earlier Flathub commit on Freedesktop 25.08. Its executable was
+inspected at GLIBC 2.42. The other four pins are at or below the KDE 6.11
+baseline. Cemu currently has no AArch64 Flathub app, so it is not part of these
+standalone component builds. These components are packaged for AArch64 targets;
+their inclusion does not claim every game or graphics backend will work on the
+Chromebook's Mali GPU.
+
+To check which runtime a particular historical Flatpak commit needs, inspect
+the app's AArch64 history and query a commit from that history:
+
+```bash
+flatpak remote-info --user --arch=aarch64 --log flathub APP_ID/aarch64/stable
+flatpak remote-info --user --commit=COMMIT_HASH --show-runtime \
+  flathub APP_ID/aarch64/stable
+```
+
+To inspect the GLIBC symbol versions actually required by an installed app,
+first install its AArch64 ref (or install its required historical app commit
+with `flatpak update --user --commit=COMMIT_HASH APP_ID`), then scan the app's
+executables and shared libraries. Set `APP_ID` to the app ID, for example
+`org.DolphinEmu.dolphin-emu`:
+
+```bash
+app_location="$(flatpak info --show-location --user "$APP_ID")"
+find "$app_location/files" -type f \
+  \( -perm /111 -o -name '*.so' -o -name '*.so.*' \) -print0 |
+  while IFS= read -r -d '' elf; do
+    readelf --version-info "$elf" 2>/dev/null || true
+  done |
+  grep -o 'GLIBC_[0-9.]*' | sort -Vu | tail
+```
+
+For an archived component executable, unpack the archive and run `readelf`
+directly. For example:
+
+```bash
+mkdir -p .tmp-component-inspect
+tar -xzf linux-arm64/scummvm/artifacts/scummvm.tar.gz \
+  -C .tmp-component-inspect
+readelf --version-info .tmp-component-inspect/bin/scummvm |
+  grep -o 'GLIBC_[0-9.]*' | sort -Vu | tail
+```
+
+Compare the maximum against the runtime available in the app. The Chromebook's
+KDE 6.11 runtime baseline was checked with:
+
+```bash
+flatpak run --user --command=sh org.kde.Platform//6.11 \
+  -c 'ldd --version | head -n 1'
+```
+
+If a current app commit exceeds that baseline, check older commits in the
+history and their runtime branches before pinning one. Keep pins and measured
+GLIBC versions updated together when upgrading components or the application
+runtime. Remove the temporary inspection directory when finished.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
