@@ -159,16 +159,35 @@ reset PPSSPP once in the Configurator to apply its defaults. This replaces its
 current `ppsspp.ini` and `controls.ini`, so back them up first if they contain
 settings to keep.
 
-The ScummVM builder extracts the native AArch64 Flathub app, pinned at
-`f1fcccc1433fc8ea77d8adff40946d3083055d5eec5facb50a8f262d7a362dcc`.
-Flathub's manifest uses Freedesktop 25.08. The component keeps the upstream
+The ScummVM builder extracts the native AArch64 Flathub app, currently using
+the candidate commit
+`a742f597c46657508a03bd65f26349b427a14a3dbe9adfcc7ed9eb5a5dde2bad`.
+This historical app ref uses Freedesktop 25.08. A newer app binary was found
+to require GLIBC 2.43 and 2.44, above the KDE 6.11 runtime's GLIBC 2.42, so
+the historical binary's GLIBC requirements still need verification before
+using its archive. The component builder now checks that the installed app
+commit matches the requested pin and fails if the pinned update cannot be
+downloaded. The component keeps the upstream
 Linux ARM ScummVM system definition: RetroArch's ScummVM core remains the
 default, and standalone ScummVM is available as an alternate emulator. The
 ES-DE build adds the bundled launcher to the `SCUMMVM` static-path lookup. The
 archive is written to
-`linux-arm64/scummvm/artifacts/scummvm.tar.gz`. This integration still needs
-an on-device build and game launch check; the Chromebook currently cannot
-resolve Flathub from its build environment.
+`linux-arm64/scummvm/artifacts/scummvm.tar.gz`. After building, extract it and
+inspect the AArch64 binary before rebuilding RetroDECK:
+
+```bash
+mkdir -p .tmp-scummvm-inspect
+tar -xzf linux-arm64/scummvm/artifacts/scummvm.tar.gz \
+  -C .tmp-scummvm-inspect
+readelf --version-info .tmp-scummvm-inspect/bin/scummvm |
+  grep -o 'GLIBC_[0-9.]*' | sort -Vu | tail
+```
+
+Accept the binary only if its highest GLIBC requirement is no newer than
+2.42. The candidate's app runtime was checked as Freedesktop 25.08, but the
+candidate binary and game launch have not yet been verified. The build attempt
+in this environment could not resolve Flathub, so it did not download the
+candidate or regenerate the previous archive.
 
 The ES-DE build fetches the RetroDECK theme from its `main` branch, matching
 the existing component recipe. Pin the theme revision for a reproducible
