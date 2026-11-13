@@ -265,6 +265,37 @@ requires host network access for icon validation; if a sandbox reports
 `NETLINK_ROUTE` permission errors, rerun that export command with the required
 host permissions.
 
+### Complete rebuild and run example
+
+This is the full command sequence for rebuilding all ARM components, rebuilding
+the RetroDECK Flatpak, exporting it, updating the installed branch, and
+launching it:
+
+```bash
+cd /home/duet/dev/retrodeck/components-arm-prototype
+
+./linux-arm64/framework/build-component.sh
+./linux-arm64/retroarch/build-component.sh
+./linux-arm64/pico-8/build-component.sh
+./linux-arm64/ppsspp/build-component.sh
+./linux-arm64/ruffle/build-component.sh
+./linux-arm64/scummvm/build-component.sh
+./linux-arm64/es-de/build-component.sh
+
+cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
+
+flatpak-builder --user --force-clean --arch=aarch64 --jobs=2 \
+  --disable-updates --disable-rofiles-fuse --install-deps-from=flathub \
+  build-arm64 net.retrodeck.retrodeck.arm64.yml
+
+flatpak build-export --arch=aarch64 \
+  .flatpak-builder/repo-arm64 build-arm64 arm-prototype
+
+flatpak update --user net.retrodeck.retrodeck//arm-prototype
+
+flatpak run --user net.retrodeck.retrodeck//arm-prototype
+```
+
 ## 9. Run RetroArch and test a Game Boy Color ROM
 
 Check that the installed RetroArch binary starts in the Flatpak runtime:
