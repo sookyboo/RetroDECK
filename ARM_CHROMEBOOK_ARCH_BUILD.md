@@ -9,7 +9,8 @@ builds the frontend with GLES and validates launching a bundled core.
 > setup, runs ES-DE scraping, and launches Game Boy, SNES, Mega Drive, Master
 > System, Game Gear, Sega CD, NES through Mesen, and PICO-8 games. An Xbox
 > Bluetooth controller works, and RetroArch save states and Game Boy saves were
-> confirmed. Steam ROM Manager and PortMaster remain deferred.
+> confirmed. PortMaster ARM packaging is in progress and has not been tested in
+> the Flatpak.
 
 ## 1. Check the machine and GPU
 
@@ -113,8 +114,8 @@ The omitted x86 core names are `ardens`, `boom3_xp`, `bsnes_hd_beta`,
 ## 6. Build the ARM component archives
 
 The ARM Flatpak manifest expects RetroArch, framework, ES-DE, PICO-8, PPSSPP,
-Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME, and xemu component archives
-in the sibling components worktree.
+Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME, xemu, and PortMaster component
+archives in the sibling components worktree.
 Generate them before building the full app:
 
 ```bash
@@ -130,8 +131,18 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/melonds/build-component.sh
 ./linux-arm64/mame/build-component.sh
 ./linux-arm64/xemu/build-component.sh
+PORTMASTER_ARCHIVE_PATH=/home/duet/dev/retrodeck/.tmp-retroarch-arm-inspect/retrodeck.portmaster.zip \
+  ./linux-arm64/portmaster/build-component.sh
 ./linux-arm64/es-de/build-component.sh
 ```
+
+The PortMaster builder pins release `2026.11.12-1059`. The optional
+`PORTMASTER_ARCHIVE_PATH` uses the archive already downloaded from the official
+release URL, which avoids re-downloading that 24 MiB archive. It still gathers
+SDL libraries from KDE SDK/Platform 6.7 and liblzma from Freedesktop 25.08.
+Those runtimes must be available to Flatpak when building. PortMaster's reset
+refreshes bundled files in place, keeps the user's PortMaster config/data, and
+uses Flatpak's `XDG_DATA_HOME` for its control files and launcher.
 
 The ES-DE builder uses the successful GLES smoke-test manifest and requires
 the RetroArch archive first. It builds ES-DE with `FLATPAK_BUILD=off`, stages
@@ -370,6 +381,8 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/melonds/build-component.sh
 ./linux-arm64/mame/build-component.sh
 ./linux-arm64/xemu/build-component.sh
+PORTMASTER_ARCHIVE_PATH=/home/duet/dev/retrodeck/.tmp-retroarch-arm-inspect/retrodeck.portmaster.zip \
+  ./linux-arm64/portmaster/build-component.sh
 ./linux-arm64/es-de/build-component.sh
 
 cd /home/duet/dev/retrodeck/RetroDECK-arm-prototype
@@ -526,10 +539,8 @@ before adding one to the ARM manifest.
 
 ### SRM and PortMaster integration status
 
-The ARM prototype does not currently bundle Steam ROM Manager (SRM) or
-PortMaster. Their absent shell helpers cause startup messages, but neither
-integration blocked the verified setup, scraping, or game launches. These
-integrations are deferred to separate work.
+Steam ROM Manager (SRM) remains deferred. PortMaster packaging work has been
+added to the ARM branch, but it is not yet built into or tested in the Flatpak.
 
 - **SRM:** RetroDECK uses SRM to add RetroDECK and ES-DE favorites to Steam,
   including artwork and shortcut management. The current Flatpak recipe
@@ -539,18 +550,18 @@ integrations are deferred to separate work.
   is accessible. See the [Flathub architecture listing](https://flathub.org/apps/details/com.steamgriddb.steam-rom-manager),
   [Flathub manifest](https://raw.githubusercontent.com/flathub/com.steamgriddb.steam-rom-manager/master/com.steamgriddb.steam-rom-manager.json),
   and [upstream releases](https://github.com/SteamGridDB/steam-rom-manager/releases).
-- **PortMaster:** PortMaster publishes AArch64 runtimes, but its supported
-  device list documents RetroDECK on Steam Deck and does not list this
-  Chromebook. The existing RetroDECK component prepares files under
-  `$XDG_DATA_HOME/PortMaster`, while its launcher executes
-  `/var/data/PortMaster/PortMaster.sh`; resolve this path difference before
-  packaging it. Test GUI/input/display compatibility and individual ARM ports
-  on Panfrost/KDE. See the [supported devices](https://portmaster.games/installation/supported-handhelds/)
-  and [runtime architectures](https://portmaster.games/installation/runtimes/).
-- For clean startup without pretending either full integration is available,
-  guard optional helper calls or package only the architecture-independent
-  helper scripts and keep unavailable UI actions disabled. Neither full SRM
-  nor full PortMaster support has been tested on the Chromebook.
+- **PortMaster:** Release `2026.11.12-1059` includes AArch64 helpers, with a
+  maximum observed GLIBC requirement of 2.38. The ARM component patches its
+  launcher/control paths to use Flatpak's `XDG_DATA_HOME` and preserves the
+  user's PortMaster data on reset. Its SDL libraries come from KDE 6.7 and
+  liblzma from Freedesktop 25.08. The component build currently needs those
+  runtimes from Flathub; the attempt in this environment stopped because DNS
+  could not resolve `flathub.org`. After building, test the GUI, controller,
+  display, networking, and individual ARM ports on Panfrost/KDE. PortMaster's
+  [supported devices](https://portmaster.games/installation/supported-handhelds/)
+  page focuses on handheld custom firmware, so it does not establish Chromebook
+  compatibility; see also [runtime architectures](https://portmaster.games/installation/runtimes/).
+- SRM and PortMaster remain unverified as complete Chromebook integrations.
 
 ### ES-DE GLES smoke test
 

@@ -138,9 +138,10 @@ smoke-test-only workarounds.
   BIOS files in RetroDECK's configured BIOS directory.
 - A Bluetooth Xbox controller works; pressing LS and RS together opens the
   RetroArch menu, including its save option. Game Boy game saves also work.
-- SRM and PortMaster are deferred to separate work. They are not bundled, and
-  their missing shell helpers produce startup messages without blocking the
-  verified use cases.
+- PortMaster ARM packaging is in progress. Its archive includes AArch64 helper
+  binaries, and the component now adapts its launcher/control paths to Flatpak
+  `XDG_DATA_HOME` while preserving user data on reset. It has not yet been built
+  into or tested in the app. Steam ROM Manager remains deferred.
 - The Flatpak runtime/SDK AArch64 refs are available from Flathub; see the
   exact `remote-info` commands in the Chromebook guide.
 

@@ -353,6 +353,11 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/xemu/artifacts
         dest: components
+      # PortMaster's GUI/helpers are bundled for AArch64 and use the same
+      # component lifecycle and XDG data location as the other ARM components.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/portmaster/artifacts
+        dest: components
 
   # -------------------------------------------------------------------------
   # finisher - final tidy-up steps: move files, create icons, install desktop
