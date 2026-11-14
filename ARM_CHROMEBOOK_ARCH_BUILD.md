@@ -505,7 +505,7 @@ not a guarantee that a component will build or run well on this Chromebook.
 | RPCS3 | ARM64 AppImage archive built and manifest entry added; Chromebook launch testing pending; graphics support and practical performance are uncertain |
 | Ruffle | Packaged; Flash game launch confirmed. Controller mapping remains unverified |
 | Steam ROM Manager | ARM64 AppImage archive built and manifest entry added; Chromebook launch testing pending |
-| Vita3K | AArch64 AppImage archive built and manifest entry added; Chromebook launch testing pending |
+| Vita3K | AArch64 build 4103, matching the x86 component, is packaged; maximum observed GLIBC is 2.38; Chromebook launch testing pending |
 | xemu | Packaged in the manifest; Chromebook game launch not recorded |
 | XRoar | Not ported; native ARM source build appears feasible |
 
@@ -576,7 +576,8 @@ Sources: [DuckStation releases](https://github.com/stenzek/duckstation/releases)
   RetroArch, PICO-8, PPSSPP, Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME,
   xemu, DuckStation, Vita3K, RPCS3, Cemu, Steam ROM Manager, and PortMaster.
   DuckStation, Vita3K, RPCS3, Cemu, and Steam ROM Manager archives are built;
-  their runtime behavior has not been tested on the Chromebook.
+  Vita3K is pinned to build 4103 and its AArch64 files require GLIBC up to 2.38.
+  Runtime behavior for these five archives has not been tested on the Chromebook.
   A PSP game launched successfully through standalone PPSSPP after
   pinning the compatible AArch64 Flathub commit and rebuilding its archive.
   The integrated `arm-prototype`
