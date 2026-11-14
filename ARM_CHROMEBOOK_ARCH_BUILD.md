@@ -9,8 +9,9 @@ builds the frontend with GLES and validates launching a bundled core.
 > setup, runs ES-DE scraping, and launches Game Boy, SNES, Mega Drive, Master
 > System, Game Gear, Sega CD, NES through Mesen, and PICO-8 games. An Xbox
 > Bluetooth controller works, and RetroArch save states and Game Boy saves were
-> confirmed. PortMaster ARM packaging is in progress and has not been tested in
-> the Flatpak.
+> confirmed. The ARM manifest also packages standalone emulator components and
+> PortMaster; see the inventory below for individual test coverage and remaining
+> integration work.
 
 ## 1. Check the machine and GPU
 
@@ -464,45 +465,55 @@ identified for the x86 RetroDECK build, whether an ARM route was identified,
 and the prototype's current status. ARM availability is an initial assessment,
 not a guarantee that a component will build or run well on this Chromebook.
 
-### Engines
+### Engine components
 
-| Component | x86 RetroDECK packaging | ARM route identified | ARM prototype status |
-|---|---|---|---|
-| IkemenGO / M.U.G.E.N | Bundled component | Ikemen GO's Go code may be portable; legacy M.U.G.E.N is a separate compatibility question | Not started |
-| OpenBOR | Bundled component | Native ARM source build appears feasible | Not started |
-| PICO-8 | User supplies licensed files | User's copy contains an AArch64 binary | Integrated; game launch confirmed |
-| ScummVM | Standalone component; RetroArch core also available | AArch64 Flathub app and RetroArch core are available; standalone uses a pinned older compatible app build | Standalone integrated and launch tested; fullscreen defaults now apply after component reset |
-| Solarus | Bundled component | Native ARM source build appears feasible | Not started |
-| UZDoom | Bundled component | ARM source build appears feasible; graphics compatibility needs testing | Not started |
+| Component | ARM prototype status |
+|---|---|
+| IkemenGO / M.U.G.E.N | Not ported; Ikemen GO and legacy M.U.G.E.N need separate feasibility checks |
+| OpenBOR | Not ported |
+| PICO-8 | Packaged; Chromebook game launch confirmed using the user's licensed AArch64 files |
+| ScummVM | Packaged; standalone launch tested |
+| Solarus | Not ported |
+| UZDoom (GZDoom component) | Not ported |
 
-### Emulators
+### Emulator and utility components
 
-| Component | x86 RetroDECK packaging | ARM route identified | ARM prototype status |
-|---|---|---|---|
-| Azahar | Bundled standalone emulator | ARM64 route needs runtime and device compatibility checks | Not started |
-| Cemu | Bundled standalone emulator | ARM support and build feasibility need checking | Not started |
-| Dolphin | Bundled standalone emulator | ARM64 builds/source are available; graphics and performance need device testing | Not started |
-| DuckStation (Legacy) | Bundled standalone emulator | ARM64 support/build route needs checking | Not started |
-| melonDS | Bundled standalone emulator | Native ARM build appears feasible | Not started |
-| PCSX2 | Bundled standalone emulator | ARM64 compatibility and Chromebook performance need investigation | Not started |
-| PPSSPP | Standalone Flatpak and RetroArch core | AArch64 Flathub app and core are available; standalone uses a pinned older compatible app build | Integrated; standalone game launch confirmed; config reset was needed to apply defaults |
-| PrimeHack | Bundled standalone emulator | ARM support and dependencies need investigation | Not started |
-| RPCS3 | Bundled standalone emulator | Not identified as a practical target for this Chromebook prototype | Not started |
-| Ruffle | Flatpak | AArch64 Flathub build is available; prototype pins an older runtime-compatible commit | Integrated; Flash game launch confirmed. Controller mapping was not working; docs recommend keyboard and mouse |
-| Vita3K | Bundled standalone emulator | ARM64 support/build feasibility needs checking | Not started |
-| xemu | Bundled standalone emulator | ARM support/build feasibility needs checking | Not started |
-| XRoar | Bundled standalone emulator | Native ARM source build appears feasible | Not started |
+| Component | ARM prototype status |
+|---|---|
+| Azahar | Packaged in the manifest; Chromebook game launch not recorded |
+| Cemu | Not ported; ARM support and build feasibility need checking |
+| Dolphin | Packaged in the manifest; Chromebook game launch not recorded |
+| DuckStation (Legacy) | Not ported; ARM64 build route needs checking |
+| Flips | Not ported |
+| melonDS | Packaged in the manifest; Chromebook game launch not recorded |
+| MAME | Packaged in the manifest; Chromebook game launch not recorded |
+| PCSX2 | Not ported; ARM64 compatibility and Chromebook performance need investigation |
+| PPSSPP | Packaged; standalone game launch confirmed; reset was needed to apply defaults |
+| PrimeHack | Not ported; ARM support and dependencies need investigation |
+| RetroArch | Packaged; multiple cores and game launches confirmed; 194 matching ARM64 cores are bundled |
+| RPCS3 | Not ported; not identified as a practical target for this Chromebook prototype |
+| Ruffle | Packaged; Flash game launch confirmed. Controller mapping remains unverified |
+| Steam ROM Manager | Deferred; no ARM component in the manifest |
+| Vita3K | Not ported; ARM64 support/build feasibility needs checking |
+| xemu | Packaged in the manifest; Chromebook game launch not recorded |
+| XRoar | Not ported; native ARM source build appears feasible |
 
-The components marked “not started” are inventory only. Validate upstream
-architecture support, runtime requirements, graphics backend, and performance
-before adding one to the ARM manifest.
+`Framework`, ES-DE, and PortMaster are also packaged in the manifest. ES-DE's
+frontend and PortMaster's basic launch path have been exercised; PortMaster's
+full GUI and broad port compatibility remain unverified. “Packaged” means an
+ARM component recipe/archive is staged by the manifest; it does not claim that
+every emulator has launched or that every game works on the Chromebook.
+
+The components marked “Not ported” are candidates for future work. Validate
+upstream architecture support, runtime requirements, graphics backend, and
+performance before adding one to the ARM manifest.
 
 ## 11. Known limitations and next work
 
-- Framework, ES-DE, PICO-8, PPSSPP, and RetroArch component archives were built,
-  and the full ARM manifest completed with all five components staged. A PSP
-  game launched successfully through standalone PPSSPP after pinning the
-  compatible AArch64 Flathub commit and rebuilding the component archive.
+- The current ARM manifest stages 13 components: framework, ES-DE, RetroArch,
+  PICO-8, PPSSPP, Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME, xemu, and
+  PortMaster. A PSP game launched successfully through standalone PPSSPP after
+  pinning the compatible AArch64 Flathub commit and rebuilding its archive.
   The integrated `arm-prototype`
   branch has launched successfully: the first-run Zenity wizard completed,
   ES-DE's scraper ran, and a Game Boy game launched. The separate ES-DE

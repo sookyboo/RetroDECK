@@ -11,14 +11,15 @@ Target a full local RetroDECK Flatpak on the AArch64 Arch Linux Chromebook:
 - Mali-G72 MC3 GPU using Panfrost; desktop OpenGL 3.1 and GLES 3.1 work.
 - Vulkan has no driver on this host. Use RetroArch's OpenGL video driver.
 - KDE Flatpak Platform and SDK 6.11, AArch64.
-- Initial emulation scope: RetroArch plus Gambatte, Snes9x, and Genesis Plus GX.
+- The initial game-test baseline was RetroArch with Gambatte, Snes9x, and Genesis Plus GX; the current manifest packages additional standalone emulators.
 
-There are two separate prototypes. The ARM RetroDECK Flatpak currently proves
-that the bundled ARM RetroArch executable runs and plays a GBC ROM when launched
-directly. A separate ES-DE GLES test app now proves ES-DE can discover a ROM,
-launch the bundled RetroArch/Gambatte, and render a game. The full RetroDECK
-framework → ES-DE → RetroArch flow has not yet been integrated or validated.
-Do not describe either prototype as a complete ARM RetroDECK build.
+The ARM Flatpak prototype now integrates the framework, ES-DE, and ARM
+components through its normal first-run flow. ES-DE has launched games through
+RetroArch cores and standalone emulators on the Chromebook. This remains a
+hardware-specific prototype: component inclusion in the manifest does not mean
+every emulator or game has been tested. See the build guide's component
+inventory for packaged, tested, and remaining work. Do not describe it as a
+production ARM RetroDECK release.
 
 ## Repositories and branch state
 
@@ -55,19 +56,11 @@ libretro cores. Its output is:
 components-arm-prototype/linux-arm64/retroarch/artifacts/retroarch.tar.gz
 ```
 
-Two additional component builders are now present:
-
-- `linux-arm64/framework/build-component.sh` packages the architecture-neutral
-  framework scripts and metadata.
-- `linux-arm64/es-de/build-component.sh` builds the ES-DE GLES smoke-test app
-  and assembles an ES-DE component archive containing the executable, required
-  private libraries, Linux ARM resources, RetroDECK theme/config, and component
-  scripts.
-
-Their expected archives are
-`linux-arm64/framework/artifacts/framework.tar.gz` and
-`linux-arm64/es-de/artifacts/es-de.tar.gz`. The main ARM manifest stages all
-three component artifact directories for `install_components.sh`.
+The ARM component worktree now has builders for the framework, ES-DE,
+RetroArch, PICO-8, PPSSPP, Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME,
+xemu, and PortMaster. The main ARM manifest stages these 13 components for
+`install_components.sh`; see the component inventory in the Chromebook guide
+for game-test status. Generated archives remain local and Git-ignored.
 
 The main ARM manifest is `net.retrodeck.retrodeck.arm64.yml`. It selects the
 AArch64 rclone release, omits unused yq, and removes x86/i386 codec and
@@ -126,9 +119,9 @@ smoke-test-only workarounds.
 - ES-DE 3.5.0 builds with GLES enabled and visibly renders on Panfrost.
 - ES-DE can launch the bundled RetroArch and Gambatte and play the same GBC
   game when built with `FLATPAK_BUILD=off`.
-- The framework and ES-DE component builders have produced local archives; the
-  full ARM manifest built successfully and its installer staged ES-DE,
-  framework, and RetroArch together in the appdir.
+- The ARM component builders and manifest stage the 13 components listed
+  above. The full integrated Flatpak completed first-run setup and launched
+  games; individual component coverage is tracked in the Chromebook guide.
 - The installed integrated prototype completed the Zenity first-run wizard,
   ran the ES-DE scraper, and launched a Game Boy game. The ARM manifest links
   ES-DE's component resources into `/app/share/es-de`, as required by its
@@ -149,15 +142,18 @@ smoke-test-only workarounds.
 ### Still outstanding
 
 1. Verify theme/config loading. Restart persistence has been verified.
-2. Check the x86_64 build remains unchanged and choose a maintainable
-   architecture-selection pattern for component recipes before broadening the
-   ARM core/emulator list. Choose the next systems based on user priorities.
+2. Test the ARM-packaged standalone emulators that do not yet have recorded
+   game-launch validation, including their Configurator reset paths.
+3. Choose the next components from the unported list in the Chromebook guide;
+   check the x86_64 build remains unchanged as ARM support is added.
 
 ## Recommended continuation sequence
 
-1. Check the x86_64 build remains unchanged and choose a maintainable
-   architecture-selection pattern before broadening the ARM core/emulator list.
-2. Record successful commands/results here and in the Chromebook build guide;
+1. Validate launch and Configurator reset behavior for the ARM-packaged
+   components that lack Chromebook game tests.
+2. Choose the next systems from the unported component list and preserve the
+   x86_64 build while broadening ARM support.
+3. Record successful commands/results here and in the Chromebook build guide;
    commit the verified changes on the `arm-prototype` branches. Do not push
    until the user has verified the build works.
 
