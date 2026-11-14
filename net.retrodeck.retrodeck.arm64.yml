@@ -66,6 +66,9 @@ finish-args:
   - --filesystem=xdg-run/gamescope-0:ro
   # - --env=LD_LIBRARY_PATH=/usr/lib/extensions/vulkan/gamescope/lib
 
+  # Permit ARM32 (AArch32/ARMHF) binaries on ARM64 hosts when the host kernel supports them
+  - --allow=multiarch
+
   # Network 
   - --share=network
 

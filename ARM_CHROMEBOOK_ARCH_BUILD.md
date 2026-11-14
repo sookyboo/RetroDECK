@@ -726,3 +726,29 @@ section 7, export it as in section 8, and run the `arm-prototype` branch.
 PICO-8 launch was confirmed on the Chromebook with a cartridge from
 `$roms_path/pico8`. Its save path is configured under `$saves_path/pico-8`, but
 PICO-8 save-file persistence has not been separately verified.
+
+## 12. ARM32 multiarch execution probe
+
+The ARM64 RetroDECK manifest enables Flatpak's `--allow=multiarch` feature.
+On the AArch64 Chromebook, a standalone probe Flatpak using the same KDE 6.11
+runtime successfully executed a statically linked ARMv7/AArch32 EABI binary:
+
+```text
+ARM32 native execution OK (no libc)
+```
+
+The probe directly invokes the Linux ARM32 `write` and `exit` syscalls. It has
+no `PT_INTERP`, dynamic loader, glibc, or shared-library dependencies. Running
+the same Flatpak with multiarch explicitly disabled failed with exit code 159.
+This confirms that the host and Flatpak can execute this static ARM32 binary
+when the permission is enabled.
+
+This does **not** establish that dynamically linked ARMHF ports can run. They
+still need a 32-bit ARM dynamic loader and compatible libraries inside the
+Flatpak, and the host kernel must support AArch32 userspace. The probe source
+and standalone manifest used for this experiment are in the workspace's
+`arm32-flatpak-probe` directory. The installed test app can be rerun with:
+
+```bash
+flatpak run org.retrodeck.Arm32FlatpakProbe
+```
