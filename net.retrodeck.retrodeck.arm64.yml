@@ -353,6 +353,17 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/xemu/artifacts
         dest: components
+      # These standalone emulators use upstream AArch64 AppImages, extracted
+      # and assembled with the same component recipes as their x86 builds.
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/duckstation/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/vita3k/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/rpcs3/artifacts
+        dest: components
       # PortMaster's GUI/helpers are bundled for AArch64 and use the same
       # component lifecycle and XDG data location as the other ARM components.
       - type: dir
