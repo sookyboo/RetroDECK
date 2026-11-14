@@ -116,7 +116,8 @@ The omitted x86 core names are `ardens`, `boom3_xp`, `bsnes_hd_beta`,
 
 The ARM Flatpak manifest expects RetroArch, framework, ES-DE, PICO-8, PPSSPP,
 Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME, xemu, DuckStation, Vita3K,
-RPCS3, and PortMaster component archives in the sibling components worktree.
+RPCS3, Cemu, Steam ROM Manager, and PortMaster component archives in the
+sibling components worktree.
 Generate them before building the full app:
 
 ```bash
@@ -135,6 +136,8 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/duckstation/build-component.sh
 ./linux-arm64/vita3k/build-component.sh
 ./linux-arm64/rpcs3/build-component.sh
+./linux-arm64/cemu/build-component.sh
+./linux-arm64/steam-rom-manager/build-component.sh
 PORTMASTER_ARCHIVE_PATH=/home/duet/dev/retrodeck/.tmp-retroarch-arm-inspect/retrodeck.portmaster.zip \
   ./linux-arm64/portmaster/build-component.sh
 ./linux-arm64/es-de/build-component.sh
@@ -388,6 +391,8 @@ cd /home/duet/dev/retrodeck/components-arm-prototype
 ./linux-arm64/duckstation/build-component.sh
 ./linux-arm64/vita3k/build-component.sh
 ./linux-arm64/rpcs3/build-component.sh
+./linux-arm64/cemu/build-component.sh
+./linux-arm64/steam-rom-manager/build-component.sh
 PORTMASTER_ARCHIVE_PATH=/home/duet/dev/retrodeck/.tmp-retroarch-arm-inspect/retrodeck.portmaster.zip \
   ./linux-arm64/portmaster/build-component.sh
 ./linux-arm64/es-de/build-component.sh
@@ -487,7 +492,7 @@ not a guarantee that a component will build or run well on this Chromebook.
 | Component | ARM prototype status |
 |---|---|
 | Azahar | Packaged in the manifest; Chromebook game launch not recorded |
-| Cemu | Not ported; ARM support and build feasibility need checking |
+| Cemu | ARM64 CI AppImage archive built and manifest entry added; Chromebook launch testing pending |
 | Dolphin | Packaged in the manifest; Chromebook game launch not recorded |
 | DuckStation (Legacy) | ARM64 AppImage archive built and manifest entry added; Chromebook launch testing pending |
 | Flips | Not ported |
@@ -499,7 +504,7 @@ not a guarantee that a component will build or run well on this Chromebook.
 | RetroArch | Packaged; multiple cores and game launches confirmed; 194 matching ARM64 cores are bundled |
 | RPCS3 | ARM64 AppImage archive built and manifest entry added; Chromebook launch testing pending; graphics support and practical performance are uncertain |
 | Ruffle | Packaged; Flash game launch confirmed. Controller mapping remains unverified |
-| Steam ROM Manager | Deferred; no ARM component in the manifest |
+| Steam ROM Manager | ARM64 AppImage archive built and manifest entry added; Chromebook launch testing pending |
 | Vita3K | AArch64 AppImage archive built and manifest entry added; Chromebook launch testing pending |
 | xemu | Packaged in the manifest; Chromebook game launch not recorded |
 | XRoar | Not ported; native ARM source build appears feasible |
@@ -526,8 +531,8 @@ already integrated or tested in the ARM prototype.
 | DuckStation (Legacy) | AppImage | Upstream publishes an ARM64 AppImage | Yes |
 | Vita3K | AppImage | Upstream publishes an AArch64 AppImage | Yes |
 | RPCS3 | AppImage | Upstream publishes a Linux ARM64 AppImage from its separate ARM64 builds repository | Yes |
-| Steam ROM Manager | Flathub Flatpak, extracted into the component | Upstream publishes an ARM64 AppImage | No; use a different input/package route |
-| Cemu | Flathub Flatpak, extracted into the component | An ARM AppImage is available from upstream CI; no matching ARM Flatpak or stable release was identified | No; experimental CI artifact and different package route |
+| Steam ROM Manager | Flathub Flatpak, extracted into the component | Upstream publishes an ARM64 AppImage | No; packaged using an ARM AppImage recipe |
+| Cemu | Flathub Flatpak, extracted into the component | ARM AppImage is available from upstream CI; no matching ARM Flatpak or stable release was identified | No; packaged using a moving CI AppImage artifact |
 | OpenBOR | AppImage | Upstream documents building a native ARM64 Linux binary from source | No matching ARM AppImage identified |
 | Flips | RetroDECK-provided Linux binary zip | An AArch64 Arch Linux ARM package exists; no matching RetroDECK binary zip identified | No |
 | Solarus | AppImage | No upstream Linux ARM64 AppImage was identified; source builds are the likely route | No matching artifact identified |
@@ -536,22 +541,24 @@ already integrated or tested in the ARM prototype.
 | PCSX2 | x86_64 AppImage | Upstream says ARM builds are unsupported | No |
 | PrimeHack | x86_64 release build | No upstream ARM64 release artifact was identified | No |
 
-ARM-specific recipes now target upstream AppImages for DuckStation, Vita3K,
-and RPCS3. RPCS3's AArch64 release asset is an AppImage, so it uses the same
-input and extraction approach as the x86 component. The three component archives are built; Chromebook launch tests are still pending. Steam ROM
-Manager and Cemu have ARM options, but adopting them would change the
-component's current x86 input method. Artifact availability does not establish
-performance or compatibility on the Chromebook.
+ARM-specific recipes now package upstream AppImages for DuckStation, Vita3K,
+RPCS3, Cemu, and Steam ROM Manager. All five component archives are built, but
+Chromebook launch tests are pending. Cemu uses the current AppImage artifact
+from its CI workflow, distributed through nightly.link; this is a moving,
+largely untested CI build rather than a stable release. Artifact availability
+does not establish performance or compatibility on the Chromebook.
 
 The Chromebook's Panfrost stack exposes OpenGL ES 3.1 and has no Vulkan driver.
 DuckStation lists OpenGL ES 3.1 as supported, so it is the most plausible of
-these three to run here. Vita3K's minimum is OpenGL 4.4, above this host's
-reported capability. RPCS3's current listed minimum is Vulkan 1.2, which this
-host does not provide; its Linux ARM64 binary is available, but the emulator
-is unlikely to be usable on this device without a suitable graphics backend.
-See the upstream [DuckStation requirements](https://github.com/stenzek/duckstation),
-[Vita3K quickstart](https://vita3k.org/quickstart.html), and
-[RPCS3 requirements](https://rpcs3.io/faq.html).
+these five to run here. Vita3K requires OpenGL 4.4, while RPCS3 requires Vulkan
+1.2. Cemu requires OpenGL 4.5 or Vulkan 1.2. Those requirements exceed the
+graphics APIs available on this host, so these three are unlikely to run here
+without a suitable graphics backend. The ARM archives still provide packaging
+and launch integration for devices with compatible graphics support. See the
+upstream [DuckStation requirements](https://github.com/stenzek/duckstation),
+[Vita3K quickstart](https://vita3k.org/quickstart.html),
+[RPCS3 requirements](https://rpcs3.io/faq.html), and
+[Cemu requirements](https://cemu.info/).
 
 Sources: [DuckStation releases](https://github.com/stenzek/duckstation/releases),
 [Vita3K releases](https://github.com/Vita3K/Vita3K/releases),
@@ -565,11 +572,11 @@ Sources: [DuckStation releases](https://github.com/stenzek/duckstation/releases)
 
 ## 11. Known limitations and next work
 
-- The ARM manifest is configured to stage 16 components: framework, ES-DE,
+- The ARM manifest is configured to stage 18 components: framework, ES-DE,
   RetroArch, PICO-8, PPSSPP, Ruffle, ScummVM, Azahar, Dolphin, melonDS, MAME,
-  xemu, DuckStation, Vita3K, RPCS3, and PortMaster. DuckStation, Vita3K, and
-  RPCS3 archives are built; their runtime behavior has not been tested on the
-  Chromebook.
+  xemu, DuckStation, Vita3K, RPCS3, Cemu, Steam ROM Manager, and PortMaster.
+  DuckStation, Vita3K, RPCS3, Cemu, and Steam ROM Manager archives are built;
+  their runtime behavior has not been tested on the Chromebook.
   A PSP game launched successfully through standalone PPSSPP after
   pinning the compatible AArch64 Flathub commit and rebuilding its archive.
   The integrated `arm-prototype`
@@ -608,18 +615,17 @@ Sources: [DuckStation releases](https://github.com/stenzek/duckstation/releases)
 
 ### SRM and PortMaster integration status
 
-Steam ROM Manager (SRM) remains deferred. PortMaster packaging work has been
+SRM's ARM AppImage archive is now staged in the manifest; launching it and
+testing Steam integration remain pending. PortMaster packaging work has been
 added to the ARM branch and built into the Flatpak. An individual ARM port was
 confirmed to launch; controller-to-keyboard and mouse emulation needs host
 `/dev/uinput` access as described below. Full GUI, display, networking, and
 broader port compatibility remain to be verified.
 
 - **SRM:** RetroDECK uses SRM to add RetroDECK and ES-DE favorites to Steam,
-  including artwork and shortcut management. The current Flatpak recipe
-  downloads an x86_64-only Flathub app whose manifest uses an AMD64 Debian
-  package. Upstream publishes an ARM64 AppImage, so a custom ARM component
-  appears possible. It is useful only where a compatible Steam installation
-  is accessible. See the [Flathub architecture listing](https://flathub.org/apps/details/com.steamgriddb.steam-rom-manager),
+  including artwork and shortcut management. The ARM component uses the
+  upstream ARM64 AppImage because the Flathub app is x86_64-only. It is useful
+  only where a compatible Steam installation is accessible. See the [Flathub architecture listing](https://flathub.org/apps/details/com.steamgriddb.steam-rom-manager),
   [Flathub manifest](https://raw.githubusercontent.com/flathub/com.steamgriddb.steam-rom-manager/master/com.steamgriddb.steam-rom-manager.json),
   and [upstream releases](https://github.com/SteamGridDB/steam-rom-manager/releases).
 - **PortMaster:** Release `2026.11.12-1059` includes AArch64 helpers, with a
