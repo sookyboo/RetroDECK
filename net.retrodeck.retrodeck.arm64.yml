@@ -364,6 +364,9 @@ modules:
       - type: dir
         path: ../components-arm-prototype/linux-arm64/rpcs3/artifacts
         dest: components
+      - type: dir
+        path: ../components-arm-prototype/linux-arm64/cemu/artifacts
+        dest: components
       # PortMaster's GUI/helpers are bundled for AArch64 and use the same
       # component lifecycle and XDG data location as the other ARM components.
       - type: dir
