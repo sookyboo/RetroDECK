@@ -508,6 +508,47 @@ The components marked “Not ported” are candidates for future work. Validate
 upstream architecture support, runtime requirements, graphics backend, and
 performance before adding one to the ARM manifest.
 
+### ARM upstream builds and packaging matches
+
+Checked 2026-11-14 against upstream release/build pages. “Same method” here
+means an upstream Linux ARM64 artifact in the same package form that the x86
+RetroDECK component currently consumes; it does not mean the component is
+already integrated or tested in the ARM prototype.
+
+| Component | x86 RetroDECK input | ARM64 availability | Same-method match? |
+|---|---|---|---|
+| DuckStation (Legacy) | AppImage | Upstream publishes an ARM64 AppImage | Yes |
+| Vita3K | AppImage | Upstream publishes an AArch64 AppImage | Yes |
+| RPCS3 | AppImage | Upstream has a separate Linux ARM64 builds repository; its release artifact format needs confirmation | Not confirmed |
+| Steam ROM Manager | Flathub Flatpak, extracted into the component | Upstream publishes an ARM64 AppImage | No; use a different input/package route |
+| Cemu | Flathub Flatpak, extracted into the component | An ARM AppImage is available from upstream CI; no matching ARM Flatpak or stable release was identified | No; experimental CI artifact and different package route |
+| OpenBOR | AppImage | Upstream documents building a native ARM64 Linux binary from source | No matching ARM AppImage identified |
+| Flips | RetroDECK-provided Linux binary zip | An AArch64 Arch Linux ARM package exists; no matching RetroDECK binary zip identified | No |
+| Solarus | AppImage | No upstream Linux ARM64 AppImage was identified; source builds are the likely route | No matching artifact identified |
+| XRoar | RetroDECK-provided binary tarball | Native ARM source build appears feasible; no matching upstream ARM64 binary tarball was identified | No matching artifact identified |
+| UZDoom (GZDoom component) | Linux x86_64 AppImage | No Linux ARM64 artifact was identified | No |
+| PCSX2 | x86_64 AppImage | Upstream says ARM builds are unsupported | No |
+| PrimeHack | x86_64 release build | No upstream ARM64 release artifact was identified | No |
+
+The confirmed same-method candidates are **DuckStation and Vita3K**. Before
+porting either, verify the current release artifact and its runtime
+dependencies, then add an ARM-specific component recipe and test it on the
+target device. RPCS3 should be reclassified only after confirming the format
+of its current ARM64 release assets. Steam ROM Manager and Cemu have ARM
+options, but adopting them would change the component's current x86 input
+method. This is upstream artifact availability only; it does not establish
+performance or compatibility on the Chromebook.
+
+Sources: [DuckStation releases](https://github.com/stenzek/duckstation/releases),
+[Vita3K releases](https://github.com/Vita3K/Vita3K/releases),
+[RPCS3 ARM64 builds](https://github.com/RPCS3/rpcs3-binaries-linux-arm64),
+[Steam ROM Manager releases](https://github.com/SteamGridDB/steam-rom-manager/releases),
+[Cemu CI builds](https://github.com/cemu-project/Cemu/actions/runs/31884801588),
+[OpenBOR build instructions](https://github.com/DCurrent/openbor/wiki/Compiling-Overview),
+[Flips for Arch Linux ARM](https://archlinuxarm.org/packages/aarch64/flips),
+[UZDoom releases](https://github.com/UZDoom/UZDoom/releases), and
+[PCSX2 build requirements](https://pcsx2.net/docs/advanced/building/).
+
 ## 11. Known limitations and next work
 
 - The current ARM manifest stages 13 components: framework, ES-DE, RetroArch,
