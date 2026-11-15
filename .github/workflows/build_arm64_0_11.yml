@@ -1,0 +1,71 @@
+name: Build RetroDECK 0.11 AArch64
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-arm64:
+    name: Build ARM components and Flatpak
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout RetroDECK 0.11 ARM branch
+        uses: actions/checkout@v6
+        with:
+          path: arm/RetroDECK-arm-0.11.0
+
+      - name: Checkout Components 0.11 ARM branch
+        uses: actions/checkout@v6
+        with:
+          repository: RetroDECK/components
+          ref: arm-0.11.0
+          path: arm/components-arm-0.11.0
+
+      - name: Install build tools and configure Flathub
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder gettext-base jq p7zip-full unzip
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build ARM component archives
+        working-directory: arm/components-arm-0.11.0
+        run: |
+          for component in \
+            retroarch framework es-de pico-8 ppsspp ruffle scummvm \
+            azahar dolphin melonds mame xemu portmaster \
+            duckstation vita3k rpcs3 cemu steam-rom-manager; do
+            printf '\nBuilding %s for AArch64\n' "$component"
+            bash "linux-arm64/$component/build-component.sh"
+          done
+
+      - name: Build AArch64 RetroDECK Flatpak
+        working-directory: arm/RetroDECK-arm-0.11.0
+        run: |
+          mkdir -p output
+          flatpak-builder \
+            --user \
+            --force-clean \
+            --disable-rofiles-fuse \
+            --jobs=2 \
+            --arch=aarch64 \
+            --install-deps-from=flathub \
+            --repo=repo-arm64 \
+            build-arm64 \
+            net.retrodeck.retrodeck.arm64.yml
+          flatpak build-bundle \
+            --arch=aarch64 \
+            repo-arm64 \
+            output/RetroDECK-0.11.0-aarch64.flatpak \
+            net.retrodeck.retrodeck
+
+      - name: Upload ARM build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: RetroDECK-0.11.0-aarch64
+          path: |
+            arm/RetroDECK-arm-0.11.0/output/*.flatpak
+            arm/components-arm-0.11.0/linux-arm64/*/artifacts/*.tar.gz
+            arm/components-arm-0.11.0/linux-arm64/*/artifacts/*.sha
+          if-no-files-found: error
