@@ -25,7 +25,7 @@ jobs:
       - name: Checkout Components 0.11 ARM branch
         uses: actions/checkout@v6
         with:
-          repository: RetroDECK/components
+          repository: ${{ github.repository_owner }}/components
           ref: arm-0.11.0
           path: arm/components-arm-0.11.0
 
