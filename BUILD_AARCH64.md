@@ -93,9 +93,14 @@ for component in \
   azahar dolphin melonds mame xemu portmaster \
   duckstation vita3k rpcs3 cemu steam-rom-manager es-de; do
   printf '\nBuilding %s for AArch64\n' "$component"
-  bash "linux-arm64/$component/build-component.sh" || exit 1
+  if ! bash "linux-arm64/$component/build-component.sh"; then
+    printf 'Build failed for %s; stopped the loop.\n' "$component" >&2
+    break
+  fi
 done
 ```
+
+The loop stops at the first failed component and leaves the terminal open.
 
 ES-DE is last because it prepares the frontend integration and system
 definitions for the other components. Each successful build writes an archive
