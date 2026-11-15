@@ -2,6 +2,12 @@ name: Build RetroDECK 0.11 AArch64
 
 on:
   workflow_dispatch:
+    inputs:
+      build_jobs:
+        description: 'Maximum parallel build jobs; use 1 to reduce load on a Chromebook'
+        required: false
+        default: 2
+        type: number
 
 permissions:
   contents: read
@@ -31,24 +37,37 @@ jobs:
 
       - name: Build ARM component archives
         working-directory: arm/components-arm-0.11.0
+        env:
+          BUILD_JOBS: ${{ inputs.build_jobs || 2 }}
         run: |
+          if ! [[ "$BUILD_JOBS" =~ ^[1-9][0-9]*$ ]]; then
+            printf 'build_jobs must be a positive integer; got %s\n' "$BUILD_JOBS" >&2
+            exit 1
+          fi
+
           for component in \
             retroarch framework es-de pico-8 ppsspp ruffle scummvm \
             azahar dolphin melonds mame xemu portmaster \
             duckstation vita3k rpcs3 cemu steam-rom-manager; do
             printf '\nBuilding %s for AArch64\n' "$component"
-            bash "linux-arm64/$component/build-component.sh"
+            if [[ "$component" == es-de ]]; then
+              ESDE_BUILD_JOBS="$BUILD_JOBS" bash "linux-arm64/$component/build-component.sh"
+            else
+              bash "linux-arm64/$component/build-component.sh"
+            fi
           done
 
       - name: Build AArch64 RetroDECK Flatpak
         working-directory: arm/RetroDECK-arm-0.11.0
+        env:
+          BUILD_JOBS: ${{ inputs.build_jobs || 2 }}
         run: |
           mkdir -p output
           flatpak-builder \
             --user \
             --force-clean \
             --disable-rofiles-fuse \
-            --jobs=2 \
+            --jobs="$BUILD_JOBS" \
             --arch=aarch64 \
             --install-deps-from=flathub \
             --repo=repo-arm64 \
