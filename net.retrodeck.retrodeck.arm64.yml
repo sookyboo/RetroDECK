@@ -45,6 +45,10 @@ finish-args:
   # Devices: All device access (e.g., /dev/*, used for various inputs)
   - --device=all
 
+  # Devices: device-tree model and compatible (read-only). ARM handhelds have no DMI; this is how PortMaster
+  # (and anything else) tells which device it runs on, and the sandbox doesn't expose /sys/firmware otherwise.
+  - --filesystem=/sys/firmware/devicetree:ro
+
   # Devices: Bluetooth access (used for various inputs)
   - --allow=bluetooth
 
