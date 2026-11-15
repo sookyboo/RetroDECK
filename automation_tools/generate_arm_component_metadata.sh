@@ -18,7 +18,7 @@ separator=''
   printf '{\n'
 for archive in "${archives[@]}"; do
   component="$(basename "${archive%.tar.gz}")"
-  version_member="$(tar -tzf "$archive" | awk '$0 == "component_version" || $0 == "./component_version" || $0 ~ /\/component_version$/ { print; exit }')"
+  version_member="$(tar -tzf "$archive" | awk '($0 == "component_version" || $0 == "./component_version" || $0 ~ /\/component_version$/) && !found { print; found=1 }')"
   if [[ -z "$version_member" ]]; then
     printf 'Missing component_version in %s\n' "$archive" >&2
     exit 1
