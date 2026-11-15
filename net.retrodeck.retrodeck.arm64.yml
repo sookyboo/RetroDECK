@@ -346,6 +346,7 @@ modules:
   - name: install-components
     buildsystem: simple
     build-commands:
+      - bash automation_tools/generate_arm_component_metadata.sh
       - bash automation_tools/install_components.sh
       # ES-DE was built with /app as its install prefix. Expose the staged
       # component data at the path ES-DE expects inside the application.
