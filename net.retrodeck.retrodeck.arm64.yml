@@ -1,0 +1,514 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#           ______     _            ______ _____ _____  _   __
+#           | ___ \   | |           |  _  \  ___/  __ \| | / /
+#           | |_/ /___| |_ _ __ ___ | | | | |__ | /  \/| |/ /
+#           |    // _ \ __| '__/ _ \| | | |  __|| |    |    \
+#           | |\ \  __/ |_| | | (_) | |/ /| |___| \__/\| |\  \
+#           \_| \_\___|\__|_|  \___/|___/ \____/ \____/\_| \_/
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ARM64 build manifest derived from the RetroDECK 0.11 manifest.
+app-id: net.retrodeck.retrodeck
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+command: retrodeck
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#                             Extensions
+#                     Additional runtime components
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#                             finish-args
+#                         Runtime permissions
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+finish-args:
+  # D-Bus: Prevent screen saver from activating
+  - --talk-name=org.freedesktop.ScreenSaver
+
+  # D-Bus: Prevent power management (sleep, suspend) actions
+  - --talk-name=org.freedesktop.PowerManagement.Inhibit
+
+  # D-Bus: Manage user session (systemd-logind)
+  - --talk-name=org.freedesktop.login1.Manager
+
+  # D-Bus: Share IPC namespace for inter-process communication
+  - --share=ipc
+
+  # Devices: All device access (e.g., /dev/*, used for various inputs)
+  - --device=all
+
+  # Devices: Bluetooth access (used for various inputs)
+  - --allow=bluetooth
+
+  # Filesystem: host lets users store the RetroDECK folder on external media (NAS / SD card/ HDD), permission recommended by Flathub maintainers.
+  - --filesystem=host
+
+  # Filesystem: Discord (For the components that has an option for Discord Rich Presence)
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
+
+  # Filesystem: GTK-3 configuration (read-only)
+  - --filesystem=xdg-config/gtk-3.0:ro
+
+  # Filesystem: lsfg-vk, Steam for Lossless.dll
+
+  - --filesystem=xdg-config/lsfg-vk:rw
+  - --env=LSFGVK_FLATPAK=1
+  - --env=LSFGVK_CONFIG=~/.config/lsfg-vk/conf.toml
+
+  # Filesystem: Steam ROM Manager / Steam Integration
+  - --filesystem=xdg-data/Steam:rw
+  - --filesystem=~/.var/app/com.valvesoftware.Steam:rw
+
+  # Filesystem: Udev information (read-only, for inputs)
+  - --filesystem=/run/udev:ro
+
+  # GStreamer integration
+  - --env=GST_PLUGIN_SYSTEM_PATH=/app/lib/gstreamer-1.0:/usr/lib/aarch64-linux-gnu/gstreamer-1.0
+
+  # Permit ARM32 binaries on ARM64 hosts when the host kernel supports them.
+  - --allow=multiarch
+
+  # Gamescope integration
+  - --filesystem=xdg-run/gamescope-0:ro
+  # - --env=LD_LIBRARY_PATH=/usr/lib/extensions/vulkan/gamescope/lib
+
+  # Network 
+  - --share=network
+
+  # Environmental Paths: MangoHud, JRE (Java based Systems), Gamescope and OBS (Disabled for now) 
+  # - --env=PATH=/usr/lib/extensions/vulkan/MangoHud/bin/:/app/jre/bin/:/usr/lib/extensions/vulkan/gamescope/bin:/usr/lib/extensions/vulkan/OBSVkCapture/bin
+
+  # Sound: PulseAudio, PipeWire
+  - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0
+
+  # Wayland: Display server access, SDL window-class, Qt platform selection
+  - --socket=wayland
+  - --env=SDL_VIDEO_WAYLAND_WMCLASS=net.retrodeck.retrodeck
+  - --env=QT_QPA_PLATFORM=wayland;wayland-egl;xcb
+
+  # X11: Display server access, SDL window-class
+  - --socket=x11
+  - --env=SDL_VIDEO_X11_WMCLASS=net.retrodeck.retrodeck
+
+  # Xemu: openSUSE QEMU_AUDIO_DRV fix
+  - --unset-env=QEMU_AUDIO_DRV
+
+cleanup:
+  - /include
+  - /share/ffmpeg
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /include
+  - /bin/glslangValidator
+  - /bin/zip*
+  - /bin/zstd*
+  - /lib/pkg-config
+  - /share/doc
+  - /share/gtk-doc
+  - /share/man
+  - /src
+  - '*.a'
+  - '*.la'
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#                              Modules
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+modules:
+
+  # -------------------------------------------------------------------------
+  # RetroDECK version module
+  #
+  # - If `version` is set to "cooker", the build will automatically generate a
+  #   version tag based on the current date.
+  # - Otherwise the exact string placed in the `version` file will be used.
+  #   Do **not** prepend a leading "v".
+  # - The version number is stored in `/app/retrodeck/version`.
+  #
+  # UPDATE STEPS FOR MAIN REPOSITORY
+  #   - Update `net.retrodeck.retrodeck.metainfo.xml` with the new version,
+  #      release date, and changelog notes.
+  # -------------------------------------------------------------------------
+
+  - name: initialization
+    buildsystem: simple
+    build-commands:
+      - |
+
+        # Create the retrodeck directory in the Flatpak destination
+        mkdir -p ${FLATPAK_DEST}/retrodeck/
+
+        # Derive the version from 0.11 metainfo for local ARM builds.
+        VERSION="$(sed -n 's/^[[:space:]]*<release version="\([^"]*\)".*/\1/p' net.retrodeck.retrodeck.metainfo.xml | head -n 1)"
+        if [ -z "$VERSION" ]; then
+          echo "Could not determine RetroDECK version from metainfo."
+          exit 1
+        fi
+        printf '%s\n' "$VERSION" > ${FLATPAK_DEST}/retrodeck/version
+
+        # Print the version number to the console
+        echo "Version is $(cat ${FLATPAK_DEST}/retrodeck/version)"
+
+        # Safelock to quit the build if version file is missing
+        if [ ! -f ${FLATPAK_DEST}/retrodeck/version ]; then
+          echo "Version file is missing! Terminating build."
+          exit 1
+        fi
+
+        # Initializing RO retrodeck config folder
+        mkdir -p ${FLATPAK_DEST}/retrodeck/graphics
+        mkdir -p ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/
+        mkdir -p ${FLATPAK_DEST}/retrodeck/components
+    sources:
+      - type: dir
+        path: .
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#                     RetroDECK: Generic Modules
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # -------------------------------------------------------------------------
+  # rsync - utility for transferring and synchronizing files.
+  # -------------------------------------------------------------------------
+
+  # Source: https://github.com/flathub/com.valvesoftware.Steam.Utility.steamtinkerlaunch/blob/master/modules/rsync.yml
+  - name: rsync
+    no-autogen: true
+    config-opts:
+      - --with-included-popt
+      - --with-included-zlib
+      - --disable-debug
+    sources:
+      - type: archive
+        url: https://download.samba.org/pub/rsync/src/rsync-3.5.1.tar.gz
+        sha256: c55f9c9dc10fb8bec397b399a0fdded53cc9a2d8e30891bb0d63724d25c37bef
+        x-checker-data:
+          type: anitya
+          project-id: 4217
+          stable-only: true
+          url-template: https://download.samba.org/pub/rsync/src/rsync-$version.tar.gz
+
+  # -------------------------------------------------------------------------
+  # p7zip - 7-Zip compression utilities.
+  # -------------------------------------------------------------------------
+
+  - name: p7zip
+    no-autogen: true
+    sources:
+      - type: archive
+        url: https://github.com/p7zip-project/p7zip/archive/v17.05/p7zip-v17.05.tar.gz
+        sha256: d2788f892571058c08d27095c22154579dfefb807ebe357d145ab2ddddefb1a6
+      - type: shell
+        commands:
+          - sed -i 's|/usr/local|${FLATPAK_DEST}|g' makefile.common
+    post-install:
+      - mv "${FLATPAK_DEST}/bin/7za" "${FLATPAK_DEST}/bin/7z"
+    cleanup:
+      - /man
+
+  # -------------------------------------------------------------------------
+  # xmlstarlet - XML processor & toolkit.
+  # -------------------------------------------------------------------------
+
+  - name: libxml2-compat
+    config-opts:
+      - --prefix=/app/compat/xmlstarlet
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libxml2/2.13/libxml2-2.13.9.tar.xz
+        sha256: a2c9ae7b770da34860050c309f903221c67830c86e4a7e760692b803df95143a
+    cleanup:
+      - /compat/xmlstarlet/include
+      - /compat/xmlstarlet/lib/pkgconfig
+      - /compat/xmlstarlet/share
+
+  - name: xmlstarlet
+    config-opts:
+      - --disable-static-libs
+      - --with-libxml-libs-prefix=/app/compat/xmlstarlet/lib
+      - --with-libxml-include-prefix=/app/compat/xmlstarlet/include/libxml2
+      - --disable-build-docs
+    sources:
+      - type: archive
+        url: https://downloads.sourceforge.net/xmlstar/xmlstarlet-1.6.1.tar.gz
+        sha256: 15d838c4f3375332fd95554619179b69e4ec91418a3a5296e7c631b7ed19e7ca
+      - type: shell
+        commands:
+          - cp -p /usr/share/automake-*/config.{sub,guess} .
+          - autoreconf -vfi
+    post-install:
+      # Rename the actual binary
+      - mv "${FLATPAK_DEST}/bin/xml" "${FLATPAK_DEST}/bin/xml.bin"
+      # Create wrapper script
+      - |
+        cat > "${FLATPAK_DEST}/bin/xml" << 'EOF'
+        #!/bin/sh
+        export LD_LIBRARY_PATH="/app/compat/xmlstarlet/lib:${LD_LIBRARY_PATH}"
+        exec /app/bin/xml.bin "$@"
+        EOF
+      - chmod +x "${FLATPAK_DEST}/bin/xml"
+      - ln -s "xml" "${FLATPAK_DEST}/bin/xmlstarlet"
+
+  # -------------------------------------------------------------------------
+  # yq - YAML processor.
+  # -------------------------------------------------------------------------
+
+  - name: yq
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 yq_linux_arm64 ${FLATPAK_DEST}/bin/yq
+    sources:
+      - type: file
+        url: https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_arm64
+        sha256: ceea73d4c86f2e5c91926ee0639157121f5360da42beeb8357783d79c2cc6a1d
+
+  # -------------------------------------------------------------------------
+  # socat - UNIX IPC utility.
+  # -------------------------------------------------------------------------
+
+  - name: socat
+    config-opts:
+      - --disable-openssl
+      - --disable-readline
+      - --disable-libwrap
+      - --disable-socks4
+      - --disable-socks4a
+      - --disable-proxy
+      - --disable-tun
+      - --disable-sctp
+    sources:
+      - type: archive
+        url: http://www.dest-unreach.org/socat/download/socat-1.8.1.1.tar.gz
+        sha256: f68b602c80e94b4b7498d74ec408785536fe33534b39467977a82ab2f7f01ddb
+        x-checker-data:
+          - type: anitya
+            project-id: 4848
+            url-template: http://www.dest-unreach.org/socat/download/socat-$version.tar.gz
+
+  # -------------------------------------------------------------------------
+  # yad - Zenity-alternative dialog.
+  # -------------------------------------------------------------------------
+
+  - name: yad
+    config-opts:
+      - --enable-standalone
+      - --disable-icon-browser
+      - --disable-tools
+    sources:
+      - type: archive
+        url: https://github.com/v1cont/yad/releases/download/v15.0/yad-15.0.tar.xz
+        sha256: 7cf4dc136a643bf484ceab27d9b28a513624dffe38a08731132c0e4e24073772
+        x-checker-data:
+          type: anitya
+          project-id: 5280
+          stable-only: true
+          url-template: https://github.com/v1cont/yad/releases/download/v$version/yad-$version.tar.xz
+    cleanup:
+      - /share/icons
+    modules:
+      - name: intltool
+        cleanup:
+          - '*'
+        sources:
+          - type: archive
+            url: https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz
+            sha256: 67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd
+        x-checker-data:
+          type: anitya
+          project-id: 1385
+          stable-only: true
+          url-template: https://launchpad.net/intltool/trunk/$version/+download/intltool-$version.tar.gz
+
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+#                     RetroDECK: Internal Modules
+#
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # -------------------------------------------------------------------------
+  # install-components - runs the RetroDECK component installer script retrodeck_builder.sh.
+  # -------------------------------------------------------------------------
+  
+  - name: install-components
+    buildsystem: simple
+    build-commands:
+      - bash automation_tools/install_components.sh
+      # ES-DE was built with /app as its install prefix. Expose the staged
+      # component data at the path ES-DE expects inside the application.
+      - install -d ${FLATPAK_DEST}/share
+      - ln -s ../retrodeck/components/es-de/share/es-de ${FLATPAK_DEST}/share/es-de
+    sources:
+      - type: dir
+        path: .
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/retroarch/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/framework/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/es-de/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/pico-8/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/ppsspp/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/ruffle/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/scummvm/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/azahar/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/dolphin/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/melonds/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/mame/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/xemu/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/duckstation/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/vita3k/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/rpcs3/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/cemu/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/steam-rom-manager/artifacts
+        dest: components
+      - type: dir
+        path: ../components-arm-0.11.0/linux-arm64/portmaster/artifacts
+        dest: components
+      
+  # -------------------------------------------------------------------------
+  # finisher - final tidy-up steps: move files, create icons, install desktop
+  #            entries, copy resources, and clean up temporary bits.
+  # -------------------------------------------------------------------------
+
+  - name: finisher
+    buildsystem: simple
+    build-commands:
+
+      # This prevents appstream-compose to fail
+      - | 
+        if [ -d ${FLATPAK_DEST}/usr ]; then
+          mv -n ${FLATPAK_DEST}/usr/** ${FLATPAK_DEST}/share
+          rm -rf ${FLATPAK_DEST}/usr
+        fi
+
+      # Tools
+      - mkdir -p ${FLATPAK_DEST}/tools
+      - cp -r tools/*.sh ${FLATPAK_DEST}/tools
+      - find ${FLATPAK_DEST}/tools -type f \( -name "*.sh" -o -name "*.py" \) -exec chmod +x {} \;
+
+      # Function libraries
+      - mkdir -p ${FLATPAK_DEST}/libexec
+      - cp -r functions/** "${FLATPAK_DEST}/libexec/"
+      - mv "${FLATPAK_DEST}/libexec/retrodeck.sh" "${FLATPAK_DEST}/bin/retrodeck"
+      - chmod +x "${FLATPAK_DEST}/bin/retrodeck"
+
+      # Desktop entries
+      - install -Dm755 net.retrodeck.retrodeck.desktop ${FLATPAK_DEST}/share/applications/net.retrodeck.retrodeck.desktop
+      - install -Dm755 net.retrodeck.retrodeck.Configurator.desktop ${FLATPAK_DEST}/share/applications/net.retrodeck.retrodeck.Configurator.desktop
+
+      # Initializing default emulator configs
+      - cp -r config ${FLATPAK_DEST}/retrodeck/config/
+
+      # Creating symlinks for a prettier access
+      - ln -s ${FLATPAK_DEST}/tools/configurator.sh ${FLATPAK_DEST}/bin/configurator
+
+      # Install MIME Type
+      - install -Dm 644 config/retrodeck/net.retrodeck.retrodeck.mime.xml /app/share/mime/packages/net.retrodeck.retrodeck.mime.xml
+
+      # Installing metainfo
+      - install -Dm 644 net.retrodeck.retrodeck.metainfo.xml ${FLATPAK_DEST}/share/metainfo/net.retrodeck.retrodeck.metainfo.xml
+
+      # Prepare build variant alterations
+      - |
+        version_string=$(< "${FLATPAK_DEST}/retrodeck/version")
+
+        case "$version_string" in
+          "cooker"*)
+            echo "cooker build detected, applying customizations"
+            cp -f res/rd_icons/rd-cooker/rd-cooker-icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.svg
+            cp -f res/rd_icons/rd-cooker/rd-cooker-configurator.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.configurator.svg
+          ;;
+          "countertop"*)
+            echo "countertop build detected, applying customizations"
+            cp -f res/rd_icons/rd-countertop/rd-countertop-icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.svg
+            cp -f res/rd_icons/rd-countertop/rd-countertop-configurator.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.configurator.svg
+          ;;
+          "epicure"*)
+            echo "epicure build detected, applying customizations"
+            cp -f res/rd_icons/rd-epicure/rd-epicure-icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.svg
+            cp -f res/rd_icons/rd-epicure/rd-epicure-configurator.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.configurator.svg
+          ;;
+          "branch"*)
+            echo "feature branch build detected, applying customizations"
+            cp -f res/rd_icons/rd-stable/rd-stable-icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.svg
+            cp -f res/rd_icons/rd-stable/rd-stable-configurator.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.configurator.svg
+          ;;
+          *)
+            echo "main build detected, applying customizations"
+            cp -f res/rd_icons/rd-stable/rd-stable-icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.svg
+            cp -f res/rd_icons/rd-stable/rd-stable-configurator.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/net.retrodeck.retrodeck.configurator.svg
+          ;;
+        esac
+
+# -------------------------------------------------------------------------
+# Special Fixes - Component-specific symlinks or oddities
+# -------------------------------------------------------------------------
+
+      # Dolphin
+      - ln -s "/app/retrodeck/components/dolphin/share/dolphin-emu" "/app/share/dolphin-emu"
+
+      # Gargoyle
+      - ln -s "/app/retrodeck/components/gargoyle/share/gargoyle" "/app/share/gargoyle"
+      - ln -s "/app/retrodeck/components/gargoyle/libexec/gargoyle" "/app/libexec/gargoyle"
+
+      # ScummVM
+      - ln -s "/app/retrodeck/components/scummvm/share/scummvm" "/app/share/scummvm"
+      - ln -s "/app/retrodeck/components/scummvm/share/soundfonts" "/app/share/soundfonts"
+
+
+    sources:
+      - type: dir
+        path: .
+
+  - name: summary
+    buildsystem: simple
+    build-commands:
+      - echo "RetroDECK Flatpak build completed successfully!"
+      - echo "Version: $(cat ${FLATPAK_DEST}/retrodeck/version)"
+      - echo "Flatpak path: ${FLATPAK_DEST}"
+      - echo "Included components:"
+      - ls -1 ${FLATPAK_DEST}/retrodeck/components
