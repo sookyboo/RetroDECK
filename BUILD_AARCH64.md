@@ -39,12 +39,21 @@ sudo apt-get install -y \
   flatpak flatpak-builder gettext-base jq p7zip-full unzip curl git python3
 ```
 
-Add Flathub for the current user and install build dependencies when prompted:
+Keep Flatpak build dependencies in this workspace instead of the host's
+default user installation. Set a custom Flatpak user directory from the
+workspace root, then add Flathub there:
 
 ```bash
-flatpak remote-add --user --if-not-exists flathub \
+cd "$HOME/dev/retrodeck"
+export FLATPAK_USER_DIR="$PWD/.flatpak-user"
+mkdir -p "$FLATPAK_USER_DIR"
+flatpak --user remote-add --if-not-exists flathub \
   https://flathub.org/repo/flathub.flatpakrepo
 ```
+
+Keep `FLATPAK_USER_DIR` exported in every shell used for building or running
+commands against this workspace-local installation. The downloaded runtimes,
+SDKs, and extensions will be stored in `.flatpak-user`.
 
 Allow at least 35 GB of free disk space for component scratch files,
 Flatpak build directories, and the OSTree repository. Use
@@ -86,6 +95,8 @@ export BUILD_TMPDIR="${BUILD_TMPDIR:-$PWD/.build-tmp}"
 mkdir -p "$BUILD_TMPDIR"
 export TMPDIR="$BUILD_TMPDIR"
 export ESDE_BUILD_JOBS="$ARM_BUILD_JOBS"
+export FLATPAK_USER_DIR="$PWD/.flatpak-user"
+export FLATPAK_BUILDER_STATE_DIR="$PWD/.flatpak-builder-state"
 
 cd components-arm-0.11.0
 for component in \
@@ -118,6 +129,7 @@ cd ../RetroDECK-arm-0.11.0
 
 flatpak-builder \
   --user \
+  --state-dir="$FLATPAK_BUILDER_STATE_DIR/retrodeck" \
   --force-clean \
   --disable-rofiles-fuse \
   --jobs="$ARM_BUILD_JOBS" \

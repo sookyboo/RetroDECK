@@ -11,6 +11,11 @@ Thumbs.db
 # RetroDECK specific files #
 ############################
 .flatpak-builder/
+.flatpak-builder-state/
+.flatpak-user/
+.build-tmp/
+build-arm64/
+repo-arm64/
 retrodeck-flatpak-cooker/
 retrodeck-flatpak/
 backup
